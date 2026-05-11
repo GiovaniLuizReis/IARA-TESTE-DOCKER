@@ -14,13 +14,36 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from asyncio.log import logger
+
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
 
+'''Teste'''
+import logging
+from django.http import JsonResponse
+
+
+def test_logging_view(request):
+    try:
+        data = {'user': 'leticia', 'email': 'leticia@contato.com'}
+        # Força um erro proposital para testar o log
+        raise ValueError("Erro simulado no envio de email")
+    except Exception as e:
+        # Loga o erro usando o logger configurado
+        logger.error(f"{str(e)} | {str(data)}")
+        return JsonResponse({"status": "error", "message": "Ocorreu um erro."})
+    
+
+'''Fim teste'''
+from django.urls import path 
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('test-logging/', test_logging_view, name='test_logging'), #teste
 ]
 
 if settings.DEBUG: # update 03/11/2024: (em homologa com debug true adiciona rota static)
