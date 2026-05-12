@@ -38,7 +38,7 @@ DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = [ 
 		'localhost', 
-		#'127.0.0.1',  
+		'127.0.0.1',  
 ]
 
 
@@ -76,7 +76,7 @@ THIRD_APPS = [ # são as Lib/app que instalamos no projeto
 ]
 
 PROJECT_APPS = [ # são os apps que criamos no projeto 
-        # 'apps.base',		# update 11/03/2024
+         'apps.base',		
         # 'apps.myapp',   # Removido esses apps que nao criamos ainda.
 ]
 
@@ -180,6 +180,7 @@ LOGGING = { # update 03/11/2024
             'level': 'INFO',
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': BASE_DIR / 'info.log',
+            
             'when': 'midnight',  # Rotaciona a cada meia-noite
             'backupCount': 7,  # Mantém logs dos últimos 7 dias
             'formatter': 'verbose',  # Configuração de formatação
