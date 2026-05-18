@@ -77,6 +77,7 @@ THIRD_APPS = [ # são as Lib/app que instalamos no projeto
 
 PROJECT_APPS = [ # são os apps que criamos no projeto 
          'apps.base',		
+		 'apps.pages',		
         # 'apps.myapp',   # Removido esses apps que nao criamos ainda.
 ]
 
@@ -109,6 +110,9 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+				
+                #Apps
+				'core.context_processors.context_social',
             ],
         },
     },
@@ -235,3 +239,14 @@ MEDIA_ROOT=os.path.join(BASE_DIR,'media')
 MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configuração de Messages (Class Boostrap) #
+from django.contrib.messages import constants
+
+MESSAGE_TAGS = {
+	constants.ERROR: 'alert-danger',
+	constants.WARNING: 'alert-warning',
+	constants.DEBUG: 'alert-danger',
+	constants.SUCCESS: 'alert-success',
+	constants.INFO: 'alert-info',
+}
