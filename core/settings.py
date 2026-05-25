@@ -90,6 +90,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_APPS + PROJECT_APPS
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django_session_timeout.middleware.SessionTimeoutMiddleware', #Timeout
     'corsheaders.middleware.CorsMiddleware', # CORS
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -211,6 +212,16 @@ REQUESTLOGS = {
     'METHODS': ('PUT', 'PATCH', 'POST', 'DELETE'),
 }
 
+
+# timeout tempo de inatividate no sistema
+SESSION_EXPIRE_SECONDS = 10 # 1 hora
+SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
+SESSION_EXPIRE_AFTER_LAST_ACTIVITY_GRACE_PERIOD = 60  
+SESSION_TIMEOUT_REDIRECT = '/usuarios/desconectado-inatividade/'
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/ 

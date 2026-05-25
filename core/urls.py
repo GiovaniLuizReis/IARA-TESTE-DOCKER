@@ -24,6 +24,7 @@ from django.urls import include, path
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('apps.usuarios.urls')),
+    path('usuarios/', include('apps.usuarios.urls')), # Adicionar contas
     # path('', include('pages.urls')),
 ]
 
