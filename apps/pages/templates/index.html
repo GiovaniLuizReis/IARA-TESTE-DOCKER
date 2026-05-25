@@ -1,8 +1,78 @@
-{% extends 'base.html' %}
-{% block title %}Pagina 1{% endblock %}
-{% block content %}
-    <h1>Pagina 1</h1>
-    <p>context_social: {{ social }}</p>
-    {{messages}}
-{% endblock %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IARA-Saúde | Investigação Ampla na Região Amazônica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
 
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-blue-900">IARA<span class="text-blue-500">-Saúde</span></div>
+            <nav class="hidden md:flex space-x-8 font-medium text-gray-600">
+                <a href="#" class="hover:text-blue-900 transition">Início</a>
+                <a href="#" class="hover:text-blue-900 transition">O Projeto</a>
+                <a href="#" class="hover:text-blue-900 transition">Pesquisadores</a>
+                <a href="#" class="hover:text-blue-900 transition">Publicações</a>
+            </nav>
+            <a href="{% url 'login' %}" class="bg-blue-900 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-800 transition">Área do Pesquisador</a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="bg-blue-950 text-white py-24">
+        <div class="max-w-5xl mx-auto px-6 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">Monitoramento e Saúde na Região Amazônica</h1>
+            <p class="text-lg md:text-xl text-blue-200 mb-10 max-w-2xl mx-auto">
+                Uma base de dados abrangente para o estudo dos determinantes sociais e biológicos de saúde nas populações amazônicas.
+            </p>
+            <div class="flex justify-center gap-4">
+                <button class="bg-blue-500 hover:bg-blue-400 text-white px-8 py-4 rounded-lg font-bold transition">Conheça o Projeto</button>
+                <button class="border border-blue-500 text-blue-300 hover:bg-blue-900 px-8 py-4 rounded-lg font-bold transition">Acessar Dados</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="max-w-7xl mx-auto px-6 py-20">
+        <div class="grid md:grid-cols-3 gap-10">
+            <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                <div class="text-blue-600 text-3xl mb-4">📊</div>
+                <h3 class="text-xl font-bold mb-3">Dados Integrados</h3>
+                <p class="text-gray-600">Centralização de informações clínicas, epidemiológicas e geográficas de toda a região.</p>
+            </div>
+            <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                <div class="text-blue-600 text-3xl mb-4">🔍</div>
+                <h3 class="text-xl font-bold mb-3">Pesquisa de Ponta</h3>
+                <p class="text-gray-600">Metodologia rigorosa focada no acompanhamento de longo prazo e evidências científicas.</p>
+            </div>
+            <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                <div class="text-blue-600 text-3xl mb-4">🤝</div>
+                <h3 class="text-xl font-bold mb-3">Rede de Colaboração</h3>
+                <p class="text-gray-600">Integração entre instituições acadêmicas, órgãos de saúde e a comunidade local.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-12">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-8 text-sm">
+            <div>
+                <p class="font-bold text-white mb-2">IARA-Saúde</p>
+                <p>Investigação Ampla na Região Amazônica de Saúde</p>
+            </div>
+            <div class="md:text-right">
+                <p>&copy; 2026 IARA-Saúde. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

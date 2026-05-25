@@ -77,7 +77,8 @@ THIRD_APPS = [ # são as Lib/app que instalamos no projeto
 
 PROJECT_APPS = [ # são os apps que criamos no projeto 
          'apps.base',		
-		 'apps.pages',		
+		 'apps.pages',
+		 'apps.usuarios',		
         # 'apps.myapp',   # Removido esses apps que nao criamos ainda.
 ]
 
@@ -250,3 +251,9 @@ MESSAGE_TAGS = {
 	constants.SUCCESS: 'alert-success',
 	constants.INFO: 'alert-info',
 }
+
+AUTH_USER_MODEL = 'usuarios.Usuario'
+
+# teste
+LOGIN_REDIRECT_URL = '/admin/'
+LOGOUT_REDIRECT_URL = '/'
