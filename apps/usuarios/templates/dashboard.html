@@ -82,8 +82,10 @@
             <div class="flex items-center gap-5">
                 <div class="flex items-center gap-3 border-l border-gray-200 pl-5">
                     <div class="text-right hidden md:block">
-                        <p class="text-sm font-medium text-gray-800">Dra. Amanda Silva</p>
-                        <p class="text-xs text-brand-green font-medium">Gestor Estadual</p>
+                        {% if user.is_authenticated %}
+                        <h4>Olá {{user.first_name}} {{user.last_name}}, </h4>
+                        <h4>{{user.tipo_usuario}}</h4>
+                        {% endif %}
                     </div>
                     <div class="h-9 w-9 bg-brand-blue rounded-full flex items-center justify-center text-white font-bold text-sm">AS</div>
                 </div>

@@ -265,6 +265,3 @@ MESSAGE_TAGS = {
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
-# teste
-LOGIN_REDIRECT_URL = '/admin/'
-LOGOUT_REDIRECT_URL = '/'
