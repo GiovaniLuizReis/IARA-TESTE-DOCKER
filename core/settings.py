@@ -213,11 +213,11 @@ REQUESTLOGS = {
 }
 
 
-# timeout tempo de inatividate no sistema
-SESSION_EXPIRE_SECONDS = 10 # 1 hora
+# timeout tempo de inatividade no sistema (30 minutos)
+SESSION_EXPIRE_SECONDS = 1800
 SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
-SESSION_EXPIRE_AFTER_LAST_ACTIVITY_GRACE_PERIOD = 60  
-SESSION_TIMEOUT_REDIRECT = '/usuarios/desconectado-inatividade/'
+SESSION_EXPIRE_AFTER_LAST_ACTIVITY_GRACE_PERIOD = 60
+SESSION_TIMEOUT_REDIRECT = '/desconectado-inatividade/'
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = '/'

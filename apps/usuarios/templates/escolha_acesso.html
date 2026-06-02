@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IARA-SAÚDE — Escolha de acesso</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+
+<body class="bg-white h-screen overflow-hidden flex">
+
+    <!-- ESQUERDA -->
+    <div class="hidden md:flex w-2/5 flex-col justify-center items-center text-white p-12 bg-gradient-to-br from-slate-900 to-emerald-900 relative overflow-hidden">
+
+        <div class="absolute inset-0 opacity-10">
+            <span class="material-symbols-outlined absolute top-10 left-10 text-[100px]">public</span>
+            <span class="material-symbols-outlined absolute bottom-20 right-20 text-[150px]">monitor_heart</span>
+            <span class="material-symbols-outlined absolute top-1/2 left-3/4 text-[80px]">dataset</span>
+        </div>
+
+        <div class="relative z-10 text-center">
+            <span class="material-symbols-outlined text-[80px] text-emerald-400 mb-6">
+                health_and_safety
+            </span>
+            <h1 class="text-5xl font-bold mb-4 leading-tight">
+                Dados que<br>salvam vidas
+            </h1>
+            <p class="text-xl font-light text-gray-200">
+                Gestão epidemiológica em tempo real
+            </p>
+        </div>
+    </div>
+
+    <!-- DIREITA -->
+    <div class="w-full md:w-3/5 flex justify-center items-center bg-white p-8">
+
+        <div class="w-full max-w-[400px]">
+
+            <div class="flex items-center gap-2 mb-10 text-blue-900">
+                <span class="material-symbols-outlined text-[36px]">health_and_safety</span>
+                <span class="text-3xl font-bold">IARA-SAÚDE</span>
+            </div>
+
+            <h2 class="text-2xl font-semibold mb-2 text-gray-900">Olá, {{ user.get_short_name|default:user.email }}</h2>
+            <p class="text-sm text-gray-500 mb-8">Como superusuário, escolha onde deseja acessar.</p>
+
+            <div class="flex flex-col gap-4">
+
+                <a href="/admin/"
+                   class="flex items-center gap-4 w-full px-6 py-4 rounded-xl border-2 border-slate-200 hover:border-slate-400 hover:bg-slate-50 transition group">
+                    <span class="material-symbols-outlined text-[32px] text-slate-600 group-hover:text-slate-800">admin_panel_settings</span>
+                    <div>
+                        <p class="font-semibold text-gray-900">Painel administrativo</p>
+                        <p class="text-xs text-gray-500">Gerenciar usuários, dados e configurações do sistema</p>
+                    </div>
+                </a>
+
+                <a href="{% url 'dashboard_adm' %}"
+                   class="flex items-center gap-4 w-full px-6 py-4 rounded-xl border-2 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 transition group">
+                    <span class="material-symbols-outlined text-[32px] text-emerald-600 group-hover:text-emerald-700">dashboard</span>
+                    <div>
+                        <p class="font-semibold text-gray-900">Dashboard do sistema</p>
+                        <p class="text-xs text-gray-500">Acessar o sistema como administrador da aplicação</p>
+                    </div>
+                </a>
+
+            </div>
+
+            <form method="POST" action="{% url 'logout' %}" class="mt-8">
+                {% csrf_token %}
+                <button type="submit" class="text-sm text-gray-400 hover:text-gray-600 transition">
+                    Sair da conta
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+</body>
+</html>

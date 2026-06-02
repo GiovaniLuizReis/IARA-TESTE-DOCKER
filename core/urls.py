@@ -21,10 +21,20 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include, path
 
+from django.contrib import admin
+from django.urls import path, include
+
+admin.site.site_header = "IARA Saúde"
+admin.site.site_title = "IARA Saúde"
+admin.site.index_title = "Painel administrativo"
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+]
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('apps.usuarios.urls')),
-    path('usuarios/', include('apps.usuarios.urls')), # Adicionar contas
     # path('', include('pages.urls')),
 ]
 
