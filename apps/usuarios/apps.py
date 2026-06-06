@@ -55,8 +55,4 @@ def atribuir_permissoes_aos_grupos(sender, **kwargs):
 
 class UsuariosConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'usuarios'
-
-    def ready(self):
-        from django.db.models.signals import post_migrate
-        post_migrate.connect(atribuir_permissoes_aos_grupos, sender=self)
+    name = 'apps.usuarios'

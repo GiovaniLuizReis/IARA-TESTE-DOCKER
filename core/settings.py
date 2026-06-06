@@ -36,10 +36,13 @@ SECRET_KEY = 'django-insecure-gm-86=o@%7v&2smja-e^y5j@vy55*hc0wbp81#-cy!)wwuqgsf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG')
 
+'''
 ALLOWED_HOSTS = [ 
 		'localhost', 
 		'127.0.0.1',  
-]
+]'''
+
+ALLOWED_HOSTS = ['*']
 
 
 # CORS Config
@@ -243,7 +246,7 @@ USE_TZ = True
 STATIC_ROOT = os.path.join(BASE_DIR,'static')
 STATIC_URL = '/static/' 
 
-# STATICFILES_DIRS = [ # talvez em Produção podesse usar assim.
+# STATICFILES_DIRS = [  talvez em Produção podesse usar assim.
 #     BASE_DIR / 'static',
 # ]
 
