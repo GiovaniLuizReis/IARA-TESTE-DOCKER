@@ -61,8 +61,15 @@
             <a href="#" onclick="navigateTo('coleta-view', this)" class="menu-link flex items-center px-6 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-colors border-l-4 border-transparent" data-target="coleta-view">
                 <span class="material-symbols-outlined mr-3 text-[22px]">assignment_add</span> Coletas
             </a>
-            <a href="#" onclick="alert('Tela de Usuários não detalhada no escopo.')" class="menu-link flex items-center px-6 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-colors border-l-4 border-transparent">
-                <span class="material-symbols-outlined mr-3 text-[22px]">group</span> Usuários
+            <a href="{% url 'listar_usuarios' %}"
+                class="menu-link flex items-center px-6 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-colors border-l-4 border-transparent">
+
+                    <span class="material-symbols-outlined mr-3 text-[22px]">
+                        group
+                    </span>
+
+                    Usuários
+
             </a>
             <a href="#" onclick="navigateTo('reports-view', this)" class="menu-link flex items-center px-6 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-colors border-l-4 border-transparent" data-target="reports-view">
                 <span class="material-symbols-outlined mr-3 text-[22px]">bar_chart</span> Relatórios
