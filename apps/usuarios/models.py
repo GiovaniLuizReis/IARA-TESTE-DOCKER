@@ -53,7 +53,7 @@ class Usuario(AbstractUser):
 
     username = None
     objects = UsuarioManager()
-
+    
     TIPO_USUARIO = (
         ('ADM', 'Administrador Central'),
         ('PES', 'Pesquisador'),
@@ -111,25 +111,6 @@ class Usuario(AbstractUser):
         'centro'
     ]
 
-    class Meta:
-        verbose_name = 'Usuário'
-        verbose_name_plural = 'Usuários'
-        permissions = [
-            ('cadastrar_paciente',  'Pode cadastrar paciente'),
-            ('visualizar_paciente', 'Pode visualizar dados do paciente'),
-            ('buscar_paciente',     'Pode buscar paciente'),
-            ('acompanhar_progresso','Pode acompanhar progresso do paciente'),
-            ('agendar_atendimento', 'Pode agendar atendimento presencial'),
-            ('aplicar_parte1',      'Pode aplicar Parte 1 do questionário'),
-            ('aplicar_parte2',      'Pode aplicar Parte 2 do questionário'),
-            ('editar_resposta',     'Pode editar resposta (registra auditoria)'),
-            ('registrar_exame',     'Pode registrar exame'),
-            ('registrar_atividade', 'Pode registrar atividade'),
-            ('gerenciar_usuarios',  'Pode criar e gerenciar usuários'),
-            ('gerenciar_centros',   'Pode gerenciar centros de pesquisa'),
-            ('visualizar_auditoria','Pode visualizar histórico de alterações'),
-        ]
-
     def save(self, *args, **kwargs):
 
         if not self.identificacao:
@@ -152,30 +133,6 @@ class Usuario(AbstractUser):
             )
 
         super().save(*args, **kwargs)
-        self._atribuir_grupo()
-
-    def _atribuir_grupo(self):
-        from django.contrib.auth.models import Group
-
-        GRUPOS = {
-            'ADM': 'Administrador Central',
-            'ATE': 'Atendimento',
-            'PES': 'Pesquisador',
-            'PAC': 'Paciente',
-        }
-
-        nome_grupo = GRUPOS.get(self.tipo_usuario)
-        if not nome_grupo:
-            return
-
-        try:
-            grupo = Group.objects.get(name=nome_grupo)
-        except Group.DoesNotExist:
-            return
-
-        grupos_iara = Group.objects.filter(name__in=GRUPOS.values())
-        self.groups.remove(*grupos_iara)
-        self.groups.add(grupo)
 
     def __str__(self):
         return (
