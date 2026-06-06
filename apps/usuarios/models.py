@@ -57,7 +57,6 @@ class Usuario(AbstractUser):
     TIPO_USUARIO = (
         ('ADM', 'Administrador Central'),
         ('PES', 'Pesquisador'),
-        ('PAC', 'Paciente'),
         ('ATE', 'Atendimento'),
     )
 
