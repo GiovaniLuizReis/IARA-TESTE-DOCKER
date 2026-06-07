@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
 from .models import Usuario
 from .forms import UsuarioForm
 
@@ -27,6 +28,10 @@ def login_view(request):
         messages.error(request, 'E-mail ou senha inválidos.')
 
     return render(request, 'login.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
 
 
 def dashboard_view(request):

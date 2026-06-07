@@ -1,82 +1,49 @@
-from django.db import models
+from django import forms
+from .models import Paciente
 
 
-class Paciente(models.Model):
+class PacienteForm(forms.ModelForm):
 
-    SEXO = (
-        ('M', 'Masculino'),
-        ('F', 'Feminino'),
-    )
+    class Meta:
+        model = Paciente
 
-    ESTADOS = (
-        ('AM', 'Amazonas'),
-        ('BA', 'Bahia'),
-        ('CE', 'Ceará'),
-        ('MG', 'Minas Gerais'),
-        ('PE', 'Pernambuco'),
-        ('PR', 'Paraná'),
-        ('RJ', 'Rio de Janeiro'),
-        ('RS', 'Rio Grande do Sul'),
-        ('SP', 'São Paulo'),
-    )
+        fields = [
+            'nome',
+            'email',
+            'data_nascimento',
+            'sexo',
+            'estado',
+            'centro',
+            'telefone',
+        ]
 
-    estado = models.CharField(
-        max_length=2,
-        choices=ESTADOS
-    )
+        widgets = {
+            'nome': forms.TextInput(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3'
+            }),
 
-    centro = models.IntegerField()
+            'email': forms.EmailInput(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3'
+            }),
 
-    identificacao = models.CharField(
-        max_length=30,
-        unique=True,
-        blank=True
-    )
+            'data_nascimento': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3'
+            }),
 
-    nome = models.CharField(
-        max_length=200
-    )
+            'sexo': forms.Select(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3'
+            }),
 
-    email = models.EmailField()
+            'estado': forms.Select(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3'
+            }),
 
-    telefone = models.CharField(
-        max_length=20,
-        blank=True,
-        null=True
-    )
+            'centro': forms.NumberInput(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3'
+            }),
 
-    data_nascimento = models.DateField()
-
-    sexo = models.CharField(
-        max_length=1,
-        choices=SEXO
-    )
-
-    criado_em = models.DateTimeField(
-        auto_now_add=True
-    )
-
-    def save(self, *args, **kwargs):
-
-        if not self.identificacao:
-
-            ultimo = Paciente.objects.filter(
-                estado=self.estado,
-                centro=self.centro
-            ).count() + 1
-
-            sequencial = str(ultimo).zfill(5)
-
-            centro = str(self.centro).zfill(2)
-
-            self.identificacao = (
-                f'{self.estado}'
-                f'{centro}'
-                f'PAC'
-                f'{sequencial}'
-            )
-
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.nome
+            'telefone': forms.TextInput(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3'
+            }),
+        }

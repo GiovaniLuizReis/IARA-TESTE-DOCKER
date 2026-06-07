@@ -1,221 +1,26 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IARA-SAÚDE — Dashboard</title>
+{% block title %}Dashboard — IARA-SAÚDE{% endblock %}
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            blue: '#1E3A8A',
-                            green: '#10B981',
-                            bg: '#F9FAFB',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+{% block content %}
+<h2 class="text-2xl font-bold text-gray-800 mb-6">Visão Geral</h2>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
-
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .hidden-view { display: none !important; }
-        .menu-active { background-color: rgba(255,255,255,0.1); border-left: 4px solid #10B981; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-    </style>
-</head>
-
-<body class="bg-brand-bg text-gray-800 h-screen overflow-hidden flex">
-
-    <!-- SIDEBAR -->
-    <aside id="sidebar" class="w-64 bg-brand-blue text-white flex flex-col flex-shrink-0">
-
-        <div class="h-16 flex items-center px-6 border-b border-white/10">
-            <span class="material-symbols-outlined text-brand-green mr-2">health_and_safety</span>
-            <span class="font-bold text-lg tracking-wide">IARA-SAÚDE</span>
-        </div>
-
-        <nav class="flex-1 py-6 flex flex-col gap-1">
-
-            <!-- Dashboard — todos os perfis -->
-            <a href="#" onclick="navigateTo('dashboard-view', this)"
-               class="menu-link menu-active flex items-center px-6 py-3 text-sm font-medium text-white transition-colors border-l-4 border-emerald-400"
-               data-target="dashboard-view">
-                <span class="material-symbols-outlined mr-3 text-[22px]">dashboard</span>
-                Dashboard
-            </a>
-
-            <!-- Formulários — ADM e PES -->
-            {% if user.tipo_usuario == 'ADM' or user.tipo_usuario == 'PES' %}
-            <a href="#" onclick="navigateTo('forms-view', this)"
-               class="menu-link flex items-center px-6 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-colors border-l-4 border-transparent"
-               data-target="forms-view">
-                <span class="material-symbols-outlined mr-3 text-[22px]">format_list_bulleted</span>
-                Formulários
-            </a>
-            {% endif %}
-
-            <!-- Coletas — ADM, PES e ATE -->
-            {% if user.tipo_usuario == 'ADM' or user.tipo_usuario == 'PES' or user.tipo_usuario == 'ATE' %}
-            <a href="#" onclick="navigateTo('coleta-view', this)"
-               class="menu-link flex items-center px-6 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-colors border-l-4 border-transparent"
-               data-target="coleta-view">
-                <span class="material-symbols-outlined mr-3 text-[22px]">assignment_add</span>
-                Coletas
-            </a>
-            <a href="{% url 'listar_usuarios' %}"
-                class="menu-link flex items-center px-6 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-colors border-l-4 border-transparent">
-
-                    <span class="material-symbols-outlined mr-3 text-[22px]">
-                        group
-                    </span>
-
-                    Usuários
-
-            </a>
-            {% endif %}
-
-            <!-- Relatórios — ADM e PES -->
-            {% if user.tipo_usuario == 'ADM' or user.tipo_usuario == 'PES' %}
-            <a href="#" onclick="navigateTo('reports-view', this)"
-               class="menu-link flex items-center px-6 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-colors border-l-4 border-transparent"
-               data-target="reports-view">
-                <span class="material-symbols-outlined mr-3 text-[22px]">bar_chart</span>
-                Relatórios
-            </a>
-            {% endif %}
-
-            <!-- Configurações — somente ADM -->
-            {% if user.tipo_usuario == 'ADM' %}
-            <a href="#"
-               class="menu-link flex items-center px-6 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-colors border-l-4 border-transparent">
-                <span class="material-symbols-outlined mr-3 text-[22px]">settings</span>
-                Configurações
-            </a>
-            {% endif %}
-
-        </nav>
-
-        <!-- Logout na base da sidebar -->
-        <div class="p-4 border-t border-white/10">
-            <form method="POST" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <button type="submit"
-                    class="w-full flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
-                    <span class="material-symbols-outlined mr-3 text-[20px]">logout</span>
-                    Sair
-                </button>
-            </form>
-        </div>
-
-    </aside>
-
-    <!-- CONTEÚDO PRINCIPAL -->
-    <main class="flex-1 flex flex-col overflow-hidden">
-
-        <!-- HEADER -->
-        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-10 flex-shrink-0">
-            <div class="relative w-full max-w-md">
-                <span class="material-symbols-outlined absolute left-3 top-2 text-gray-400 text-[20px]">search</span>
-                <input type="text" placeholder="Buscar pacientes, formulários..."
-                    class="w-full bg-gray-50 border border-gray-200 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/20">
-            </div>
-
-            <div class="flex items-center gap-3 ml-4 border-l border-gray-200 pl-5 flex-shrink-0">
-                <div class="text-right hidden md:block">
-                    <p class="text-sm font-semibold text-gray-800 leading-tight">
-                        {{ user.first_name }} {{ user.last_name }}
-                    </p>
-                    <p class="text-xs text-gray-500">{{ user.get_tipo_usuario_display }}</p>
-                </div>
-                <div class="h-9 w-9 bg-brand-blue rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                    {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
-                </div>
-            </div>
-        </header>
-
-        <!-- VIEWS -->
-        <div class="flex-1 overflow-y-auto p-6 lg:p-8">
-
-            <!-- Dashboard View -->
-            <div id="dashboard-view" class="app-view">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Visão Geral</h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                        <p class="text-sm text-gray-500">Total Entrevistados</p>
-                        <h3 class="text-3xl font-bold text-gray-800">1.234</h3>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                        <p class="text-sm text-gray-500">Formulários Ativos</p>
-                        <h3 class="text-3xl font-bold text-gray-800">5</h3>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                        <p class="text-sm text-gray-500">Pesquisadores</p>
-                        <h3 class="text-3xl font-bold text-gray-800">12</h3>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                        <p class="text-sm text-gray-500">Sincronizações</p>
-                        <h3 class="text-3xl font-bold text-emerald-500">0</h3>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Formulários View -->
-            <div id="forms-view" class="app-view hidden-view">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Formulários de Pesquisa</h2>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-gray-500 text-sm">
-                    Listagem de formulários em desenvolvimento.
-                </div>
-            </div>
-
-            <!-- Coletas View -->
-            <div id="coleta-view" class="app-view hidden-view">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Coleta de Dados</h2>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-gray-500 text-sm">
-                    Módulo de coleta em desenvolvimento.
-                </div>
-            </div>
-
-            <!-- Relatórios View -->
-            <div id="reports-view" class="app-view hidden-view">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Central de Relatórios</h2>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-gray-500 text-sm">
-                    Relatórios em desenvolvimento.
-                </div>
-            </div>
-
-        </div>
-    </main>
-
-    <script>
-        function navigateTo(viewId, triggerElement) {
-            document.querySelectorAll('.app-view').forEach(el => el.classList.add('hidden-view'));
-            const target = document.getElementById(viewId);
-            if (target) target.classList.remove('hidden-view');
-
-            if (triggerElement && triggerElement.classList.contains('menu-link')) {
-                document.querySelectorAll('.menu-link').forEach(el => {
-                    el.classList.remove('menu-active', 'text-white', 'border-emerald-400');
-                    el.classList.add('text-gray-300', 'border-transparent');
-                });
-                triggerElement.classList.remove('text-gray-300', 'border-transparent');
-                triggerElement.classList.add('menu-active', 'text-white', 'border-emerald-400');
-            }
-        }
-    </script>
-
-</body>
-</html>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <p class="text-sm text-gray-500">Total Entrevistados</p>
+        <h3 class="text-3xl font-bold text-gray-800">{{ total_entrevistados }}</h3>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <p class="text-sm text-gray-500">Formulários Ativos</p>
+        <h3 class="text-3xl font-bold text-gray-800">{{ total_formularios }}</h3>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <p class="text-sm text-gray-500">Pesquisadores</p>
+        <h3 class="text-3xl font-bold text-gray-800">{{ total_pesquisadores }}</h3>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <p class="text-sm text-gray-500">Sincronizações</p>
+        <h3 class="text-3xl font-bold text-emerald-500">{{ total_sincronizacoes }}</h3>
+    </div>
+</div>
+{% endblock %}
