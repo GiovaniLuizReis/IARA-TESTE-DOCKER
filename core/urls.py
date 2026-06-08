@@ -37,6 +37,7 @@ urlpatterns = [
     path('', include('apps.usuarios.urls')),
     path('pacientes/', include('apps.pacientes.urls')),
     path('formularios/', include('apps.formularios.urls')),
+    path('coletas/', include('apps.coletas.urls')),
     # path('', include('pages.urls')),
 ]
 
