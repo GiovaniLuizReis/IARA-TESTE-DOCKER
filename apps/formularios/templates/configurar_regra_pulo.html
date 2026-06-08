@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Configurar Regra de Pulo{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <h1 class="text-3xl font-bold mb-2">Configurar Regra de Pulo</h1>
+    <p class="text-gray-500 mb-8">Definição de lógica para a pergunta: <span class="font-semibold text-gray-700">{{ pergunta.titulo }}</span></p>
+
+    <form method="POST" class="bg-white rounded-2xl shadow-sm border p-8 space-y-6">
+        {% csrf_token %}
+        
+        <div class="bg-purple-50 border border-purple-100 rounded-xl p-4 text-sm text-purple-800 mb-4">
+            <strong>Regra de Condicionalidade:</strong> Se a resposta escolhida pelo paciente corresponder ao critério abaixo, o sistema saltará os elementos intermediários diretamente para a pergunta destino configurada.
+        </div>
+
+        <div>
+            <label class="block mb-2 font-medium text-gray-700">Se a opção selecionada for:</label>
+            {{ form.opcao_condicao }}
+            {% if form.opcao_condicao.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.opcao_condicao.errors.0 }}</p>
+            {% endif %}
+        </div>
+        
+        <div>
+            <label class="block mb-2 font-medium text-gray-700">Pular diretamente para a pergunta:</label>
+            {{ form.pergunta_destino }}
+            {% if form.pergunta_destino.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.pergunta_destino.errors.0 }}</p>
+            {% endif %}
+            <p class="text-xs text-gray-400 mt-2">Apenas perguntas subsequentes pertencentes ao mesmo formulário são listadas como destinos válidos para evitar loops infinitos.</p>
+        </div>
+        
+        <div class="mt-8 flex gap-3 pt-4 border-t">
+            <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-medium shadow-sm transition-colors">
+                Salvar Regra de Pulo
+            </button>
+            <a href="{% url 'gerenciar_estrutura' pergunta.bloco.formulario.id %}" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-3 rounded-xl font-medium transition-colors">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const selects = document.querySelectorAll('select');
+        selects.forEach(select => {
+            select.classList.add('w-full', 'rounded-xl', 'border-gray-300', 'shadow-sm', 'focus:border-purple-500', 'focus:ring-purple-500');
+        });
+    });
+</script>
+{% endblock %}

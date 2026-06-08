@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Editar Formulário
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto">
+
+    <h1 class="text-3xl font-bold mb-8">
+        Editar Formulário
+    </h1>
+
+    <form method="POST"
+          class="bg-white rounded-2xl shadow-sm border p-8">
+
+        {% csrf_token %}
+
+        <div class="space-y-6">
+
+            <div>
+                <label class="block mb-2 font-medium">
+                    Nome
+                </label>
+
+                {{ form.nome }}
+            </div>
+
+            <div>
+                <label class="block mb-2 font-medium">
+                    Descrição
+                </label>
+
+                {{ form.descricao }}
+            </div>
+
+            <div>
+                <label class="flex items-center gap-3">
+                    {{ form.ativo }}
+                    Formulário ativo
+                </label>
+            </div>
+
+        </div>
+
+        <div class="mt-8 flex gap-3">
+
+            <button type="submit"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl">
+
+                Atualizar
+
+            </button>
+
+            <a href="{% url 'listar_formularios' %}"
+               class="bg-gray-200 px-6 py-3 rounded-xl">
+
+                Voltar
+
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

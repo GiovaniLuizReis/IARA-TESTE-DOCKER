@@ -36,6 +36,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('apps.usuarios.urls')),
     path('pacientes/', include('apps.pacientes.urls')),
+    path('formularios/', include('apps.formularios.urls')),
     # path('', include('pages.urls')),
 ]
 

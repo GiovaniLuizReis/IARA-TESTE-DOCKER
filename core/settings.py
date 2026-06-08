@@ -84,6 +84,7 @@ PROJECT_APPS = [ # são os apps que criamos no projeto
 		 'apps.usuarios',
 		 'apps.dashboard',
 		 'apps.pacientes',
+		 'apps.formularios',
         # 'apps.myapp',   # Removido esses apps que nao criamos ainda.
 ]
 

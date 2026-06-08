@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Opção{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <h1 class="text-3xl font-bold mb-2">Modificar Opção</h1>
+    <p class="text-gray-500 mb-8">Editando rótulo da alternativa de escolha.</p>
+
+    <form method="POST" class="bg-white rounded-2xl shadow-sm border p-8 space-y-6">
+        {% csrf_token %}
+        <div>
+            <label class="block mb-2 font-medium text-gray-700">Texto da Opção</label>
+            {{ form.texto }}
+        </div>
+        <div>
+            <label class="block mb-2 font-medium text-gray-700">Ordem</label>
+            {{ form.ordem }}
+        </div>
+        <div class="mt-8 flex gap-3 pt-4 border-t">
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-medium shadow-sm">
+                Atualizar Opção
+            </button>
+            <a href="{% url 'gerenciar_estrutura' opcao.pergunta.bloco.formulario.id %}" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-3 rounded-xl font-medium">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('input[type="text"], input[type="number"]').forEach(f => f.classList.add('w-full', 'rounded-xl', 'border-gray-300', 'shadow-sm', 'focus:border-emerald-500', 'focus:ring-emerald-500'));
+    });
+</script>
+{% endblock %}

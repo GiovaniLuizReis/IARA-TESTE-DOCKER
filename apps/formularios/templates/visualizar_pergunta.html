@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Visualização de Campo - {{ pergunta.id }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Visualização do Paciente</h1>
+            <p class="text-gray-500 mt-1">Validação de interface para renderização dinâmica.</p>
+        </div>
+        <a href="{% url 'gerenciar_estrutura' pergunta.bloco.formulario.id %}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-3 rounded-xl font-medium transition-colors">
+            Voltar para a Estrutura
+        </a>
+    </div>
+
+    <div class="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl text-sm mb-6">
+        <strong>Modo de Visualização Prévia:</strong> O bloco abaixo simula a exibição exata e o comportamento estético que o paciente visualizará ao responder ao questionário via token.
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
+        <div class="mb-4">
+            <label class="block text-lg font-semibold text-gray-800">
+                {{ pergunta.titulo }}
+                {% if pergunta.obrigatoria %}
+                    <span class="text-red-500 font-bold">*</span>
+                {% endif %}
+            </label>
+            {% if pergunta.subtitulo %}
+                <p class="text-sm text-gray-500 mt-1">{{ pergunta.subtitulo }}</p>
+            {% endif %}
+        </div>
+
+        <div class="mt-6">
+            {% if pergunta.tipo == 'texto' %}
+                <textarea rows="4" placeholder="Área de digitação de texto..." class="w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"></textarea>
+
+            {% elif pergunta.tipo == 'numero' %}
+                <input type="number" placeholder="0" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+
+            {% elif pergunta.tipo == 'data' %}
+                <input type="date" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+
+            {% elif pergunta.tipo == 'radio' %}
+                <div class="space-y-3">
+                    {% for opcao in pergunta.opcoes.all %}
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="preview_radio" value="{{ opcao.id }}" class="h-5 w-5 text-emerald-600 border-gray-300 focus:ring-emerald-500">
+                            <span class="text-gray-700">{{ opcao.texto }}</span>
+                        </label>
+                    {% empty %}
+                        <p class="text-xs text-red-500 italic">Cadastre opções para este campo para visualizar a lista.</p>
+                    {% endfor %}
+                </div>
+
+            {% elif pergunta.tipo == 'checkbox' %}
+                <div class="space-y-3">
+                    {% for opcao in pergunta.opcoes.all %}
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" name="preview_check" value="{{ opcao.id }}" class="h-5 w-5 rounded text-emerald-600 border-gray-300 focus:ring-emerald-500">
+                            <span class="text-gray-700">{{ opcao.texto }}</span>
+                        </label>
+                    {% empty %}
+                        <p class="text-xs text-red-500 italic">Cadastre opções para este campo para visualizar a lista.</p>
+                    {% endfor %}
+                </div>
+
+            {% elif pergunta.tipo == 'select' %}
+                <select class="w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                    <option value="">Selecione uma opção...</option>
+                    {% for opcao in pergunta.opcoes.all %}
+                        <option value="{{ opcao.id }}">{{ opcao.texto }}</option>
+                    {% endfor %}
+                </select>
+
+            {% elif pergunta.tipo == 'rating' %}
+                <div class="flex items-center gap-2">
+                    {% for i in "12345" %}
+                        <label class="cursor-pointer">
+                            <input type="radio" name="preview_rating" value="{{ i }}" class="sr-only peer">
+                            <span class="text-4xl text-gray-300 peer-checked:text-amber-400 hover:text-amber-300 transition-colors">★</span>
+                        </label>
+                    {% endfor %}
+                </div>
+
+            {% elif pergunta.tipo == 'nps' %}
+                <div class="flex flex-wrap justify-between gap-1 bg-gray-50 p-2 rounded-xl border">
+                    {% for i in "0123456789" %}
+                        <label class="flex-1 min-w-[35px] text-center cursor-pointer">
+                            <input type="radio" name="preview_nps" value="{{ i }}" class="sr-only peer">
+                            <span class="block p-3 rounded-lg text-sm font-semibold border bg-white peer-checked:bg-emerald-600 peer-checked:text-white transition-all">{{ i }}</span>
+                        </label>
+                    {% endfor %}
+                    <label class="flex-1 min-w-[35px] text-center cursor-pointer">
+                        <input type="radio" name="preview_nps" value="10" class="sr-only peer">
+                        <span class="block p-3 rounded-lg text-sm font-semibold border bg-white peer-checked:bg-emerald-600 peer-checked:text-white transition-all">10</span>
+                    </label>
+                </div>
+                <div class="flex justify-between text-xs text-gray-400 mt-2 px-1">
+                    <span>Extremamente improvável</span>
+                    <span>Extremamente provável</span>
+                </div>
+
+            {% elif pergunta.tipo == 'matrix' %}
+                <div class="overflow-x-auto mt-2">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b bg-gray-50">
+                                <th class="p-3 text-sm font-semibold text-gray-600">Critério</th>
+                                <th class="p-3 text-sm text-center font-semibold text-gray-600">Ruim</th>
+                                <th class="p-3 text-sm text-center font-semibold text-gray-600">Regular</th>
+                                <th class="p-3 text-sm text-center font-semibold text-gray-600">Bom</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for opcao in pergunta.opcoes.all %}
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="p-3 font-medium text-gray-700">{{ opcao.texto }}</td>
+                                    <td class="p-3 text-center"><input type="radio" name="preview_matrix_{{ opcao.id }}" value="ruim" class="text-emerald-600"></td>
+                                    <td class="p-3 text-center"><input type="radio" name="preview_matrix_{{ opcao.id }}" value="regular" class="text-emerald-600"></td>
+                                    <td class="p-3 text-center"><input type="radio" name="preview_matrix_{{ opcao.id }}" value="bom" class="text-emerald-600"></td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="p-3 text-center text-sm text-red-500 italic">Cadastre opções de linhas para construir a matriz.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            {% elif pergunta.tipo == 'ranking' %}
+                <p class="text-xs text-gray-400 mb-2">Digite números seqüenciais de prioridade (ex: 1, 2, 3)</p>
+                <div class="space-y-2">
+                    {% for opcao in pergunta.opcoes.all %}
+                        <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border">
+                            <input type="number" min="1" max="10" placeholder="Posição" class="w-20 rounded-lg border-gray-300 text-center focus:border-emerald-500 focus:ring-emerald-500">
+                            <span class="text-gray-700 font-medium">{{ opcao.texto }}</span>
+                        </div>
+                    {% empty %}
+                        <p class="text-xs text-red-500 italic">Cadastre opções para este campo para habilitar o ranking.</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
