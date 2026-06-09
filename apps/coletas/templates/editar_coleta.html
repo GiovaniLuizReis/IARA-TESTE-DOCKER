@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Coleta{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Editar Coleta</h1>
+        <p class="text-gray-500 mt-1">Atualize as configurações ou o status da pesquisa.</p>
+    </div>
+
+    <form method="POST" class="bg-white rounded-2xl shadow-sm border p-8 space-y-6">
+        {% csrf_token %}
+        <div>
+            <label class="block mb-2 font-medium text-gray-700">Nome da Campanha</label>
+            {{ form.nome }}
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                <label class="block mb-2 font-medium text-blue-900">Formulário Parte 1 (Online)</label>
+                {{ form.formulario_parte1 }}
+            </div>
+            <div class="p-4 bg-amber-50 rounded-xl border border-amber-100">
+                <label class="block mb-2 font-medium text-amber-900">Formulário Parte 2 (Laboratório)</label>
+                {{ form.formulario_parte2 }}
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block mb-2 font-medium text-gray-700">Data de Início</label>
+                {{ form.data_inicio }}
+            </div>
+            <div>
+                <label class="block mb-2 font-medium text-gray-700">Data de Fim</label>
+                {{ form.data_fim }}
+            </div>
+            <div>
+                <label class="block mb-2 font-medium text-gray-700">Status</label>
+                {{ form.status }}
+            </div>
+        </div>
+        <div class="mt-8 flex gap-3 pt-6 border-t border-gray-100">
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-medium">Salvar Alterações</button>
+            <a href="{% url 'painel_coletas' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-medium">Cancelar</a>
+        </div>
+    </form>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('input[type="text"], input[type="date"], select').forEach(field => {
+            field.classList.add('w-full', 'rounded-xl', 'border-gray-300', 'shadow-sm', 'focus:border-emerald-500', 'focus:ring-emerald-500');
+        });
+    });
+</script>
+{% endblock %}

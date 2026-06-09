@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ coleta.nome }} - Detalhes{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="mb-8 flex items-center justify-between">
+        <div>
+            <a href="{% url 'painel_coletas' %}" class="text-sm text-emerald-600 hover:underline">← Voltar ao painel</a>
+            <h1 class="text-3xl font-bold text-gray-800 mt-2">{{ coleta.nome }}</h1>
+            <p class="text-gray-500">Histórico de sessões de resposta dos pacientes vinculados.</p>
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for message in messages %}
+                <div class="p-4 bg-green-50 border border-green-200 text-green-800 rounded-xl text-sm shadow-sm">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-6 bg-gray-50 border-b border-gray-200">
+            <h2 class="font-bold text-gray-700 text-lg">Pacientes em Coleta</h2>
+        </div>
+        <table class="w-full">
+            <thead class="bg-gray-50 border-b">
+                <tr>
+                    <th class="text-left px-6 py-4 text-xs font-bold text-gray-400 uppercase">Paciente</th>
+                    <th class="text-left px-6 py-4 text-xs font-bold text-gray-400 uppercase">Fase Atual</th>
+                    <th class="text-left px-6 py-4 text-xs font-bold text-gray-400 uppercase">Última Interação</th>
+                    <th class="text-left px-6 py-4 text-xs font-bold text-gray-400 uppercase">Responsável</th>
+                    <th class="text-right px-6 py-4 text-xs font-bold text-gray-400 uppercase">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for sessao in sessoes %}
+                <tr class="hover:bg-gray-50/50 transition-colors">
+                    <td class="px-6 py-4 font-medium text-gray-900">{{ sessao.email_paciente }}</td>
+                    <td class="px-6 py-4">
+                        {% if sessao.fase_atual == 'parte1' %}
+                            <span class="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md text-xs font-medium border border-blue-100">Parte 1 (Online)</span>
+                        {% elif sessao.fase_atual == 'parte2' %}
+                            <span class="bg-amber-50 text-amber-700 px-2.5 py-1 rounded-md text-xs font-medium border border-amber-100">Parte 2 (Lab)</span>
+                        {% else %}
+                            <span class="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-md text-xs font-medium border border-gray-200">Finalizado</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500">{{ sessao.ultima_interacao|date:"d/m/Y H:i" }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">{{ sessao.get_preenchido_por_display }}</td>
+                    <td class="px-6 py-4 text-right">
+                        
+                        <a href="{% url 'visualizar_respostas' sessao.id %}" class="inline-block bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-xl text-sm font-medium transition-colors mr-2">
+                            Ver Respostas
+                        </a>
+
+                        {% if sessao.fase_atual != 'finalizado' %}
+                            <a href="{% url 'pesquisador_terminar_resposta' sessao.id %}" class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-sm transition-colors">
+                                {% if sessao.fase_atual == 'parte1' %}
+                                    Assumir P1
+                                {% else %}
+                                    Aplicar P2
+                                {% endif %}
+                            </a>
+                        {% else %}
+                            <span class="text-xs text-gray-400 font-medium inline-flex items-center gap-1">
+                                ➔ Concluído
+                            </span>
+                        {% endif %}
+
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-12 text-gray-400 italic">Nenhuma sessão registrada.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

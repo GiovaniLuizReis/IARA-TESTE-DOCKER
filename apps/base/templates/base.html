@@ -62,7 +62,7 @@
             {% endif %}
 
             {% if user.tipo_usuario == 'ADM' or user.tipo_usuario == 'PES' or user.tipo_usuario == 'ATE' %}
-            <a href="" 
+            <a href="{% url 'painel_coletas' %}" 
                class="menu-link {% if active_page == 'coletas' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4">
                 <span class="material-symbols-outlined mr-3 text-[22px]">assignment_add</span>
                 Coletas

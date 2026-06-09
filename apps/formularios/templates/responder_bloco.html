@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base_formulario.html' %}
 
 {% block title %}{{ formulario.nome }}{% endblock %}
 
@@ -47,13 +47,13 @@
                     {% if pergunta.tipo == 'texto' %}
                         <textarea name="pergunta_{{ pergunta.id }}" rows="4" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"></textarea>
 
-                    {% if pergunta.tipo == 'numero' %}
+                    {% elif pergunta.tipo == 'numero' %}
                         <input type="number" name="pergunta_{{ pergunta.id }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
 
-                    {% if pergunta.tipo == 'data' %}
+                    {% elif pergunta.tipo == 'data' %}
                         <input type="date" name="pergunta_{{ pergunta.id }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
 
-                    {% if pergunta.tipo == 'radio' %}
+                    {% elif pergunta.tipo == 'radio' %}
                         <div class="space-y-3">
                             {% for opcao in pergunta.opcoes.all %}
                                 <label class="flex items-center gap-3 cursor-pointer">
@@ -63,7 +63,7 @@
                             {% endfor %}
                         </div>
 
-                    {% if pergunta.tipo == 'checkbox' %}
+                    {% elif pergunta.tipo == 'checkbox' %}
                         <div class="space-y-3">
                             {% for opcao in pergunta.opcoes.all %}
                                 <label class="flex items-center gap-3 cursor-pointer">
@@ -73,7 +73,7 @@
                             {% endfor %}
                         </div>
 
-                    {% if pergunta.tipo == 'select' %}
+                    {% elif pergunta.tipo == 'select' %}
                         <select name="pergunta_{{ pergunta.id }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
                             <option value="">Selecione uma opção...</option>
                             {% for opcao in pergunta.opcoes.all %}
@@ -81,7 +81,7 @@
                             {% endfor %}
                         </select>
 
-                    {% if pergunta.tipo == 'rating' %}
+                    {% elif pergunta.tipo == 'rating' %}
                         <div class="flex items-center gap-2">
                             {% for i in "12345" %}
                                 <label class="cursor-pointer">
@@ -91,7 +91,7 @@
                             {% endfor %}
                         </div>
 
-                    {% if pergunta.tipo == 'nps' %}
+                    {% elif pergunta.tipo == 'nps' %}
                         <div class="flex flex-wrap justify-between gap-1 bg-gray-50 p-2 rounded-xl border">
                             {% for i in "0123456789" %}
                                 <label class="flex-1 min-w-[35px] text-center cursor-pointer">
@@ -109,7 +109,7 @@
                             <span>Extremamente provável</span>
                         </div>
 
-                    {% if pergunta.tipo == 'matrix' %}
+                    {% elif pergunta.tipo == 'matrix' %}
                         <div class="overflow-x-auto mt-2">
                             <table class="w-full text-left border-collapse">
                                 <thead>
@@ -133,10 +133,9 @@
                             </table>
                         </div>
 
-                    {% if pergunta.tipo == 'ranking' %}
-                        <p class="text-xs text-gray-400 mb-2">Digite números seqüenciais de prioridade (ex: 1, 2, 3)</p>
+                    {% elif pergunta.tipo == 'ranking' %}
+                        <p class="text-xs text-gray-400 mb-2">Digite números sequenciais de prioridade (ex: 1, 2, 3)</p>
                         <div class="space-y-2">
-                            {% endfor %}
                             {% for opcao in pergunta.opcoes.all %}
                                 <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border">
                                     <input type="number" name="pergunta_{{ pergunta.id }}_rank_{{ opcao.id }}" min="1" max="10" placeholder="Posição" class="w-20 rounded-lg border-gray-300 text-center">

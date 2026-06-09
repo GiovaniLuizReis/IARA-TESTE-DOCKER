@@ -28,6 +28,17 @@ Pacientes | IARA-SAÚDE
 
         </a>
 
+        {% if messages %}
+        <div class="space-y-2">
+            {% for message in messages %}
+                <div class="p-4 rounded-xl shadow-sm border {% if 'error' in message.tags or 'warning' in message.tags %}bg-red-50 text-red-800 border-red-200{% else %}bg-green-50 text-green-800 border-green-200{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+
     </div>
 
     <!-- Cards Resumo -->
@@ -152,6 +163,12 @@ Pacientes | IARA-SAÚDE
 
                                     Editar
 
+                                </a>
+
+                                <a href="{% url 'reenviar_link_paciente' paciente.id %}"
+                                class="bg-purple-100 text-purple-700 px-3 py-2 rounded-lg text-sm hover:bg-purple-200 font-medium transition-colors"
+                                onclick="return confirm('Deseja reenviar o link de acesso para o e-mail deste paciente?');">
+                                    Reenviar Link
                                 </a>
 
                             </div>

@@ -21,5 +21,10 @@ urlpatterns = [
         views.detalhes_paciente,
         name='detalhes_paciente'
     ),
+    path(
+        '<int:paciente_id>/reenviar-link/',
+        views.reenviar_link_paciente,
+        name='reenviar_link_paciente'
+    ),
 
 ]

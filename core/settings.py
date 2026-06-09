@@ -272,3 +272,6 @@ MESSAGE_TAGS = {
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
+# Teste emails
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'sistema@iarasaude.com.br'

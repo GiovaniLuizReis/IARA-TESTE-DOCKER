@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Questionário Concluído{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto my-20">
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-200 p-12 text-center">
+        
+        <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">Questionário Concluído</h1>
+        
+        {% if sessao.fase_atual == 'parte2' %}
+            <p class="text-gray-500">A Parte 1 foi finalizada com sucesso. A próxima etapa será realizada presencialmente no laboratório.</p>
+        {% else %}
+            <p class="text-gray-500">Todas as etapas vinculadas a este link foram registradas em segurança. Agradecemos a sua participação no projeto IARA-SAÚDE.</p>
+        {% endif %}
+
+        <div class="mt-8 pt-8 border-t border-gray-100">
+            <p class="text-xs text-gray-400 font-medium">Você pode fechar esta página com segurança.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
