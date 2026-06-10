@@ -34,10 +34,6 @@ def logout_view(request):
     return redirect('login')
 
 
-def dashboard_view(request):
-    return render(request, 'dashboard.html')
-
-
 def timeout_view(request):
     return render(request, 'timeout.html')
 

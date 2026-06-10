@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import login_view, dashboard_view, logout_view
+from .views import login_view, logout_view
 from apps.usuarios import views
+from dashboard.views import dashboard_view
 
 urlpatterns = [
     path('', login_view, name='home'),

@@ -3,24 +3,63 @@
 {% block title %}Dashboard — IARA-SAÚDE{% endblock %}
 
 {% block content %}
-<h2 class="text-2xl font-bold text-gray-800 mb-6">Visão Geral</h2>
+<div class="max-w-6xl mx-auto">
+    <div class="mb-8">
+        <h2 class="text-3xl font-bold text-gray-800">Visão Geral</h2>
+        <p class="text-gray-500 mt-1">Acompanhamento em tempo real das atividades de coleta.</p>
+    </div>
 
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-        <p class="text-sm text-gray-500">Total Entrevistados</p>
-        <h3 class="text-3xl font-bold text-gray-800">{{ total_entrevistados }}</h3>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <p class="text-sm text-gray-500 font-medium uppercase tracking-wider">Total Entrevistados</p>
+            <h3 class="text-4xl font-bold text-gray-800 mt-2">{{ total_entrevistados|default:"0" }}</h3>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <p class="text-sm text-gray-500 font-medium uppercase tracking-wider">Campanhas Ativas</p>
+            <h3 class="text-4xl font-bold text-gray-800 mt-2">{{ total_formularios|default:"0" }}</h3>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <p class="text-sm text-gray-500 font-medium uppercase tracking-wider">Pesquisadores</p>
+            <h3 class="text-4xl font-bold text-gray-800 mt-2">{{ total_pesquisadores|default:"0" }}</h3>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <p class="text-sm text-gray-500 font-medium uppercase tracking-wider">Coletas Finalizadas</p>
+            <h3 class="text-4xl font-bold text-emerald-600 mt-2">{{ total_sincronizacoes|default:"0" }}</h3>
+        </div>
     </div>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-        <p class="text-sm text-gray-500">Formulários Ativos</p>
-        <h3 class="text-3xl font-bold text-gray-800">{{ total_formularios }}</h3>
-    </div>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-        <p class="text-sm text-gray-500">Pesquisadores</p>
-        <h3 class="text-3xl font-bold text-gray-800">{{ total_pesquisadores }}</h3>
-    </div>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-        <p class="text-sm text-gray-500">Sincronizações</p>
-        <h3 class="text-3xl font-bold text-emerald-500">{{ total_sincronizacoes }}</h3>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-6 border-b border-gray-100">
+            <h3 class="font-bold text-gray-700 text-lg">Últimas Interações com Pacientes</h3>
+        </div>
+        <table class="w-full text-left">
+            <thead class="bg-gray-50 text-xs text-gray-400 uppercase">
+                <tr>
+                    <th class="px-6 py-4">Email do Paciente</th>
+                    <th class="px-6 py-4">Status</th>
+                    <th class="px-6 py-4">Última Atualização</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm divide-y divide-gray-100">
+                {% for p in pacientes_recentes %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 text-gray-700 font-medium">{{ p.email_paciente }}</td>
+                    <td class="px-6 py-4">
+                        {% if p.concluida %}
+                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">Concluído</span>
+                        {% else %}
+                            <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold">Em Andamento</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-gray-500">{{ p.ultima_interacao|date:"d/m/Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="px-6 py-10 text-center text-gray-400 italic">Nenhum dado registrado para exibir.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}
