@@ -7,9 +7,15 @@
     <h1 class="text-3xl font-bold mb-2">Configurar Regra de Pulo</h1>
     <p class="text-gray-500 mb-8">Definição de lógica para a pergunta: <span class="font-semibold text-gray-700">{{ pergunta.titulo }}</span></p>
 
-    <form method="POST" class="bg-white rounded-2xl shadow-sm border p-8 space-y-6">
+    <form method="POST" action="{% url 'configurar_regra_pulo' pergunta.id %}" class="bg-white rounded-2xl shadow-sm border p-8 space-y-6">
         {% csrf_token %}
         
+        {% if form.non_field_errors %}
+            <div class="p-4 bg-red-50 text-red-600 rounded-xl mb-4 text-sm font-medium border border-red-100">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
         <div class="bg-purple-50 border border-purple-100 rounded-xl p-4 text-sm text-purple-800 mb-4">
             <strong>Regra de Condicionalidade:</strong> Se a resposta escolhida pelo paciente corresponder ao critério abaixo, o sistema saltará os elementos intermediários diretamente para a pergunta destino configurada.
         </div>
@@ -35,7 +41,7 @@
             <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-medium shadow-sm transition-colors">
                 Salvar Regra de Pulo
             </button>
-            <a href="{% url 'gerenciar_estrutura' pergunta.bloco.formulario.id %}" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-3 rounded-xl font-medium transition-colors">
+            <a href="{% url 'gerenciar_estrutura' pergunta.formulario.id %}" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-3 rounded-xl font-medium transition-colors">
                 Cancelar
             </a>
         </div>

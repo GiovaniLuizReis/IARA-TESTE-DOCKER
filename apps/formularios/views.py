@@ -1,13 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-
-from .models import Formulario, Bloco, Pergunta, OpcaoPergunta, RegraPulo
-from .forms import FormularioForm, BlocoForm, PerguntaForm, OpcaoForm, RegraPuloForm
+from .models import Formulario, Pergunta, OpcaoPergunta, RegraPulo
+from .forms import FormularioForm, PerguntaForm, OpcaoForm, RegraPuloForm
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 
 @login_required
 def listar_formularios(request):
-    formularios = Formulario.objects.all().order_by('-criado_em')
+    formularios = Formulario.objects.all().order_by('parte', 'ordem')
     return render(request, 'listar_formularios.html', {'formularios': formularios, 'active_page': 'formularios'})
 
 @login_required
@@ -46,60 +46,23 @@ def excluir_formulario(request, formulario_id):
 @login_required
 def gerenciar_estrutura(request, formulario_id):
     formulario = get_object_or_404(Formulario, id=formulario_id)
-    blocos = formulario.blocos.all().prefetch_related('perguntas__opcoes', 'perguntas__regras_origem')
-    return render(request, 'gerenciar_estrutura.html', {'formulario': formulario, 'blocos': blocos, 'active_page': 'formularios'})
+    perguntas = formulario.perguntas.all().prefetch_related('opcoes', 'regras_origem')
+    return render(request, 'gerenciar_estrutura.html', {'formulario': formulario, 'perguntas': perguntas, 'active_page': 'formularios'})
 
 @login_required
-def cadastrar_bloco(request, formulario_id):
+def cadastrar_pergunta(request, formulario_id):
     formulario = get_object_or_404(Formulario, id=formulario_id)
-    if request.method == 'POST':
-        form = BlocoForm(request.POST)
-        if form.is_valid():
-            bloco = form.save(commit=False)
-            bloco.formulario = formulario
-            bloco.save()
-            messages.success(request, 'Bloco adicionado com sucesso.')
-            return redirect('gerenciar_estrutura', formulario_id=formulario.id)
-    else:
-        form = BlocoForm()
-    return render(request, 'cadastrar_bloco.html', {'form': form, 'formulario': formulario, 'active_page': 'formularios'})
-
-@login_required
-def editar_bloco(request, bloco_id):
-    bloco = get_object_or_404(Bloco, id=bloco_id)
-    if request.method == 'POST':
-        form = BlocoForm(request.POST, instance=bloco)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Bloco atualizado com sucesso.')
-            return redirect('gerenciar_estrutura', formulario_id=bloco.formulario.id)
-    else:
-        form = BlocoForm(instance=bloco)
-    return render(request, 'editar_bloco.html', {'form': form, 'bloco': bloco, 'active_page': 'formularios'})
-
-@login_required
-def excluir_bloco(request, bloco_id):
-    bloco = get_object_or_404(Bloco, id=bloco_id)
-    formulario_id = bloco.formulario.id
-    if request.method == 'POST':
-        bloco.delete()
-        messages.success(request, 'Bloco removido com sucesso.')
-    return redirect('gerenciar_estrutura', formulario_id=formulario_id)
-
-@login_required
-def cadastrar_pergunta(request, bloco_id):
-    bloco = get_object_or_404(Bloco, id=bloco_id)
     if request.method == 'POST':
         form = PerguntaForm(request.POST)
         if form.is_valid():
             pergunta = form.save(commit=False)
-            pergunta.bloco = bloco
+            pergunta.formulario = formulario
             pergunta.save()
             messages.success(request, 'Pergunta adicionada com sucesso.')
-            return redirect('gerenciar_estrutura', formulario_id=bloco.formulario.id)
+            return redirect('gerenciar_estrutura', formulario_id=formulario.id)
     else:
         form = PerguntaForm()
-    return render(request, 'cadastrar_pergunta.html', {'form': form, 'bloco': bloco, 'active_page': 'formularios'})
+    return render(request, 'cadastrar_pergunta.html', {'form': form, 'formulario': formulario, 'active_page': 'formularios'})
 
 @login_required
 def editar_pergunta(request, pergunta_id):
@@ -109,7 +72,7 @@ def editar_pergunta(request, pergunta_id):
         if form.is_valid():
             form.save()
             messages.success(request, 'Pergunta atualizada com sucesso.')
-            return redirect('gerenciar_estrutura', formulario_id=pergunta.bloco.formulario.id)
+            return redirect('gerenciar_estrutura', formulario_id=pergunta.formulario.id)
     else:
         form = PerguntaForm(instance=pergunta)
     return render(request, 'editar_pergunta.html', {'form': form, 'pergunta': pergunta, 'active_page': 'formularios'})
@@ -117,7 +80,7 @@ def editar_pergunta(request, pergunta_id):
 @login_required
 def excluir_pergunta(request, pergunta_id):
     pergunta = get_object_or_404(Pergunta, id=pergunta_id)
-    formulario_id = pergunta.bloco.formulario.id
+    formulario_id = pergunta.formulario.id
     if request.method == 'POST':
         pergunta.delete()
         messages.success(request, 'Pergunta removida com sucesso.')
@@ -138,7 +101,7 @@ def cadastrar_opcao(request, pergunta_id):
             opcao.pergunta = pergunta
             opcao.save()
             messages.success(request, 'Opção adicionada com sucesso.')
-            return redirect('gerenciar_estrutura', formulario_id=pergunta.bloco.formulario.id)
+            return redirect('gerenciar_estrutura', formulario_id=pergunta.formulario.id)
     else:
         form = OpcaoForm()
     return render(request, 'cadastrar_opcao.html', {'form': form, 'pergunta': pergunta, 'active_page': 'formularios'})
@@ -151,7 +114,7 @@ def editar_opcao(request, opcao_id):
         if form.is_valid():
             form.save()
             messages.success(request, 'Opção atualizada com sucesso.')
-            return redirect('gerenciar_estrutura', formulario_id=opcao.pergunta.bloco.formulario.id)
+            return redirect('gerenciar_estrutura', formulario_id=opcao.pergunta.formulario.id)
     else:
         form = OpcaoForm(instance=opcao)
     return render(request, 'editar_opcao.html', {'form': form, 'opcao': opcao, 'active_page': 'formularios'})
@@ -159,7 +122,7 @@ def editar_opcao(request, opcao_id):
 @login_required
 def excluir_opcao(request, opcao_id):
     opcao = get_object_or_404(OpcaoPergunta, id=opcao_id)
-    formulario_id = opcao.pergunta.bloco.formulario.id
+    formulario_id = opcao.pergunta.formulario.id
     if request.method == 'POST':
         opcao.delete()
         messages.success(request, 'Opção removida com sucesso.')
@@ -168,23 +131,47 @@ def excluir_opcao(request, opcao_id):
 @login_required
 def configurar_regra_pulo(request, pergunta_id):
     pergunta = get_object_or_404(Pergunta, id=pergunta_id)
+    
+    # BUSCA SE JÁ EXISTE UMA REGRA CONFIGURADA PARA ESTA PERGUNTA
+    regra_existente = RegraPulo.objects.filter(pergunta_origem=pergunta).first()
+    
     if request.method == 'POST':
-        form = RegraPuloForm(request.POST, pergunta_origem=pergunta)
+        # SE JÁ EXISTIR, O DJANGO ATUALIZA A MESMA INSTÂNCIA EM VEZ DE CRIAR UMA DUPLICADA
+        form = RegraPuloForm(request.POST, instance=regra_existente, pergunta_origem=pergunta)
         if form.is_valid():
             regra = form.save(commit=False)
             regra.pergunta_origem = pergunta
             regra.save()
-            messages.success(request, 'Regra de pulo configurada.')
-            return redirect('gerenciar_estrutura', formulario_id=pergunta.bloco.formulario.id)
+            messages.success(request, 'Regra de pulo atualizada com sucesso.')
+            return redirect('gerenciar_estrutura', formulario_id=pergunta.formulario.id)
     else:
-        form = RegraPuloForm(pergunta_origem=pergunta)
-    return render(request, 'configurar_regra_pulo.html', {'form': form, 'pergunta': pergunta, 'active_page': 'formularios'})
+        # SE JÁ EXISTIR, O INSTANCE FAZ OS SELECTS VINHAREM JÁ SELECIONADOS AUTOMATICAMENTE
+        form = RegraPuloForm(instance=regra_existente, pergunta_origem=pergunta)
+        
+    return render(request, 'configurar_regra_pulo.html', {
+        'form': form, 
+        'pergunta': pergunta, 
+        'regra_existente': regra_existente, # Passamos para o HTML saber se exibe o botão de apagar
+        'active_page': 'formularios'
+    })
 
 @login_required
 def excluir_regra_pulo(request, regra_id):
     regra = get_object_or_404(RegraPulo, id=regra_id)
-    formulario_id = regra.pergunta_origem.bloco.formulario.id
+    formulario_id = regra.pergunta_origem.formulario.id
     if request.method == 'POST':
         regra.delete()
         messages.success(request, 'Regra de pulo removida.')
     return redirect('gerenciar_estrutura', formulario_id=formulario_id)
+
+@login_required
+@xframe_options_sameorigin
+def preview_formulario(request, formulario_id):
+    formulario = get_object_or_404(Formulario, id=formulario_id)
+    perguntas = formulario.perguntas.all().prefetch_related('opcoes')
+    
+    return render(request, 'preview_formulario.html', {
+        'formulario': formulario, 
+        'perguntas': perguntas, 
+        'active_page': 'formularios'
+    })

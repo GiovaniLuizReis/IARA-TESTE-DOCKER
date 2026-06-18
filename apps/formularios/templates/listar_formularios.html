@@ -8,7 +8,7 @@
         <h1 class="text-3xl font-bold text-gray-800">Formulários</h1>
         <p class="text-gray-500 mt-1">Gerencie os formulários da pesquisa.</p>
     </div>
-    <a href="{% url 'criar_formulario' %}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-medium">
+    <a href="{% url 'cadastrar_formulario' %}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-medium">
         Novo Formulário
     </a>
 </div>
@@ -18,7 +18,7 @@
         <thead class="bg-gray-50 border-b">
             <tr>
                 <th class="text-left px-6 py-4">Nome</th>
-                <th class="text-left px-6 py-4">Descrição</th>
+                <th class="text-left px-6 py-4">Fase</th>
                 <th class="text-left px-6 py-4">Status</th>
                 <th class="text-left px-6 py-4">Criado em</th>
                 <th class="text-right px-6 py-4">Ações</th>
@@ -28,26 +28,30 @@
             {% for formulario in formularios %}
             <tr class="border-b hover:bg-gray-50">
                 <td class="px-6 py-4 font-medium">{{ formulario.nome }}</td>
-                <td class="px-6 py-4 text-gray-500">{{ formulario.descricao }}</td>
+                <td class="px-6 py-4 text-gray-500">{{ formulario.get_parte_display }}</td>
                 <td class="px-6 py-4">
                     {% if formulario.ativo %}
                         <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">Ativo</span>
                     {% else %}
                         <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm">Inativo</span>
                     {% endif %}
-                    {% if formulario.publicado %}
-                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm ml-2">Publicado</span>
-                    {% endif %}
                 </td>
                 <td class="px-6 py-4">{{ formulario.criado_em|date:"d/m/Y" }}</td>
-                <td class="px-6 py-4 text-right flex justify-end gap-3">
+                <td class="px-6 py-4 text-right flex justify-end gap-3 items-center">
+                    
+                    <button data-url="{% url 'preview_formulario' formulario.id %}" onclick="abrirModalPreview(this.dataset.url)" class="text-emerald-600 hover:text-emerald-800 font-medium" title="Ver como o paciente verá">
+                        Preview
+                    </button>
+
+                    <span class="text-gray-300">|</span>
+
                     <a href="{% url 'gerenciar_estrutura' formulario.id %}" class="text-purple-600 hover:text-purple-800">
                         Estrutura
                     </a>
                     <a href="{% url 'editar_formulario' formulario.id %}" class="text-blue-600 hover:text-blue-800">
                         Editar
                     </a>
-                    <form method="POST" action="{% url 'excluir_formulario' formulario.id %}" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir este formulário?');">
+                    <form method="POST" action="{% url 'excluir_formulario' formulario.id %}" class="inline m-0 p-0" onsubmit="return confirm('Tem certeza que deseja excluir este formulário?');">
                         {% csrf_token %}
                         <button type="submit" class="text-red-600 hover:text-red-800">Excluir</button>
                     </form>
@@ -61,4 +65,42 @@
         </tbody>
     </table>
 </div>
+
+<div id="modal-preview" class="fixed inset-0 z-50 hidden bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
+    <div class="bg-gray-100 w-full max-w-5xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden relative border border-gray-200">
+        
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-white shadow-sm z-10">
+            <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Modo de Visualização (Preview)
+            </h3>
+            <button onclick="fecharModalPreview()" class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded-lg hover:bg-red-50" title="Fechar Preview">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        
+        <div class="flex-1 w-full h-full relative">
+            <div id="loading-spinner" class="absolute inset-0 flex items-center justify-center bg-gray-100 z-0">
+                <span class="text-gray-400 font-medium animate-pulse">Carregando formulário...</span>
+            </div>
+            
+            <iframe id="iframe-preview" src="" class="w-full h-full border-none relative z-10 bg-transparent" onload="document.getElementById('loading-spinner').style.display='none'"></iframe>
+        </div>
+    </div>
+</div>
+
+<script>
+    function abrirModalPreview(url) {
+        document.getElementById('loading-spinner').style.display = 'flex'; // Mostra o "carregando"
+        document.getElementById('iframe-preview').src = url; // Coloca o link do formulário no iframe
+        document.getElementById('modal-preview').classList.remove('hidden'); // Mostra o modal na tela
+    }
+
+    function fecharModalPreview() {
+        document.getElementById('modal-preview').classList.add('hidden'); // Esconde o modal
+        setTimeout(() => {
+            document.getElementById('iframe-preview').src = ''; // Limpa o iframe depois de esconder (economiza memória)
+        }, 300);
+    }
+</script>
 {% endblock %}

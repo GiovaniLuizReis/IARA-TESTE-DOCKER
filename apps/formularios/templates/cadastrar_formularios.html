@@ -1,13 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}Novo Formulário{% endblock %}
+{% block title %}Configurar Formulário{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto">
-
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">Novo Formulário</h1>
-        <p class="text-gray-500 mt-1">Crie a base do questionário antes de adicionar os blocos e perguntas.</p>
+        <h1 class="text-3xl font-bold text-gray-800">Configurar Formulário</h1>
+        <p class="text-gray-500 mt-1">Defina as propriedades gerais do questionário temático.</p>
     </div>
 
     <form method="POST" class="bg-white rounded-2xl shadow-sm border p-8 space-y-6">
@@ -29,24 +28,31 @@
             {% endif %}
         </div>
 
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block mb-2 font-medium text-gray-700">Fase / Parte</label>
+                {{ form.parte }}
+            </div>
+            <div>
+                <label class="block mb-2 font-medium text-gray-700">Tempo Estimado (Minutos)</label>
+                {{ form.tempo_estimado }}
+            </div>
+            <div>
+                <label class="block mb-2 font-medium text-gray-700">Ordem de Exibição</label>
+                {{ form.ordem }}
+            </div>
+        </div>
+
         <div class="flex flex-col gap-4 mt-6 p-5 bg-gray-50 border border-gray-200 rounded-xl">
             <label class="flex items-center gap-3 cursor-pointer">
                 {{ form.ativo }}
-                <span class="font-medium text-gray-700">Formulário Ativo no Sistema</span>
-            </label>
-
-            <label class="flex items-center gap-3 cursor-pointer">
-                {{ form.publicado }}
-                <div>
-                    <span class="font-medium text-gray-700 block">Formulário Publicado</span>
-                    <span class="text-xs text-gray-500">Marque apenas quando a estrutura (perguntas e blocos) estiver finalizada e pronta para coleta.</span>
-                </div>
+                <span class="font-medium text-gray-700">Formulário Ativo para Coleta</span>
             </label>
         </div>
 
         <div class="mt-8 flex gap-3 pt-6 border-t border-gray-100">
             <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-medium transition-colors shadow-sm">
-                Salvar e Continuar
+                Salvar Estrutura
             </button>
             <a href="{% url 'listar_formularios' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-medium transition-colors">
                 Cancelar
@@ -57,13 +63,11 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Aplicação de classes Tailwind nos campos de texto
-        const textFields = document.querySelectorAll('input[type="text"], textarea');
+        const textFields = document.querySelectorAll('input[type="text"], input[type="number"], textarea, select');
         textFields.forEach(field => {
             field.classList.add('w-full', 'rounded-xl', 'border-gray-300', 'shadow-sm', 'focus:border-emerald-500', 'focus:ring-emerald-500');
         });
         
-        // Aplicação de classes Tailwind nos checkboxes
         const checkFields = document.querySelectorAll('input[type="checkbox"]');
         checkFields.forEach(field => {
             field.classList.add('rounded', 'border-gray-300', 'text-emerald-600', 'focus:ring-emerald-500', 'h-5', 'w-5');

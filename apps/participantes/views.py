@@ -5,183 +5,196 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
 
-from .models import Paciente
-from .forms import PacienteForm
-from apps.coletas.models import Coleta, SessaoPaciente
-
-
-@login_required
-def listar_pacientes(request):
-    pacientes = Paciente.objects.all().order_by('-id')
-    return render(
-        request,
-        'listar_pacientes.html',
-        {
-            'pacientes': pacientes
-        }
-    )
-
+from apps.atividades.models import Atividade
+from apps.formularios.models import Formulario
+from .models import Participante
+from .forms import ParticipanteForm
 
 @login_required
-def cadastrar_paciente(request):
+def cadastrar_participante(request):
     if request.method == 'POST':
-        form = PacienteForm(request.POST)
+        form = ParticipanteForm(request.POST)
 
         if form.is_valid():
-            # 1. Salva o paciente no banco (gera automaticamente a identificação baseada no Estado/Centro)
-            paciente = form.save()
+            # 1. Guarda o participante no banco de dados
+            participante = form.save()
 
-            # 2. Busca a campanha de Coleta que está ativa ("Em Andamento") no momento
-            coleta_ativa = Coleta.objects.filter(status='em_andamento').first()
+            # 2. Procura todos os formulários estruturais que estão ativos no sistema
+            formularios_ativos = Formulario.objects.filter(ativo=True).order_by('ordem')
 
-            if coleta_ativa:
-                # 3. Cria a sessão do paciente vinculada à Parte 1 do formulário
-                sessao = SessaoPaciente.objects.create(
-                    coleta=coleta_ativa,
-                    email_paciente=paciente.email,
-                    fase_atual='parte1',
-                    formulario_atual=coleta_ativa.formulario_parte1
-                )
+            if formularios_ativos.exists():
+                atividades_criadas = []
+                
+                # 3. Cria uma instância de Atividade para cada formulário temático ativo
+                for formulario in formularios_ativos:
+                    atv = Atividade.objects.create(
+                        participante=participante,
+                        formulario=formulario,
+                        status='nao_iniciado'
+                    )
+                    atividades_criadas.append(atv)
 
-                # 4. Constrói o URL absoluto com o token UUID único
-                link_formulario = request.build_absolute_uri(
-                    reverse('responder_formulario_token', args=[sessao.token_acesso])
+                # 4. Seleciona a primeira atividade da Parte 1 (P1) para servir como referência de entrada
+                atividade_chave = next(
+                    (a for a in atividades_criadas if a.formulario.parte == 'P1'), 
+                    atividades_criadas[0]
                 )
                 
-                assunto = 'IARA-Saúde: Acesso ao Questionário de Pesquisa'
-                mensagem = f"""Olá, {paciente.nome}.
+                # 5. Constrói o URL absoluto apontando diretamente para o painel geral de cards
+                link_painel = request.build_absolute_uri(
+                    reverse('painel_participante_token', args=[atividade_chave.token_acesso])
+                )
+                
+                assunto = 'IARA-Saúde: Acesso ao Painel de Pesquisa'
+                mensagem = f"""Olá, {participante.nome}.
 
 Seu cadastro na pesquisa IARA-SAÚDE foi realizado com sucesso.
-Seu código de identificação é: {paciente.identificacao}
+Seu código de identificação é: {participante.identificacao}
 
-Para acessar o seu questionário, clique no link abaixo:
-{link_formulario}
+Para acessar o seu painel de questionários, clique no link abaixo:
+{link_painel}
 
-Este link é seguro, intransferível e salva seu progresso automaticamente.
+Este link é seguro, intransferível e guarda o seu progresso automaticamente a cada resposta.
 """
                 try:
                     send_mail(
                         subject=assunto,
                         message=mensagem,
                         from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[paciente.email],
+                        recipient_list=[participante.email],
                         fail_silently=False,
                     )
-                    messages.success(request, f'Paciente {paciente.nome} cadastrado! E-mail com link enviado com sucesso.')
+                    messages.success(request, f'Participante {participante.nome} cadastrado e atividades geradas com sucesso!')
                 except Exception as e:
-                    messages.warning(request, f'Paciente salvo, mas ocorreu um erro ao enviar o e-mail: {e}')
+                    messages.warning(request, f'Participante guardado, mas ocorreu um erro ao enviar o e-mail: {e}')
             else:
-                messages.warning(request, f'Paciente {paciente.nome} cadastrado com sucesso, mas NENHUMA COLETA ESTÁ EM ANDAMENTO para gerar o link.')
+                messages.warning(request, f'Participante {participante.nome} cadastrado, mas nenhum formulário ativo foi encontrado para gerar as atividades.')
 
-            return redirect('listar_pacientes')
+            return redirect('listar_participantes')
     else:
-        form = PacienteForm()
+        form = ParticipanteForm()
 
     return render(
         request,
-        'cadastrar_paciente.html',
+        'cadastrar_participante.html',
         {
             'form': form,
-            'active_page': 'pacientes'
+            'active_page': 'participantes'
         }
     )
 
 
 @login_required
-def detalhes_paciente(request, paciente_id):
-    paciente = get_object_or_404(Paciente, id=paciente_id)
+def listar_participantes(request):
+    participantes = Participante.objects.all().order_by('-id')
     return render(
         request,
-        'detalhes_paciente.html',
+        'listar_participantes.html',
         {
-            'paciente': paciente
+            'participantes': participantes,
+            'active_page': 'participantes'
         }
     )
 
 
 @login_required
-def editar_paciente(request, paciente_id):
-    paciente = get_object_or_404(Paciente, id=paciente_id)
+def detalhes_participante(request, participante_id):
+    participante = get_object_or_404(Participante, id=participante_id)
+    return render(
+        request,
+        'detalhes_participante.html',
+        {
+            'participante': participante,
+            'active_page': 'participantes'
+        }
+    )
+
+
+@login_required
+def editar_participante(request, participante_id):
+    participante = get_object_or_404(Participante, id=participante_id)
 
     if request.method == 'POST':
-        form = PacienteForm(request.POST, instance=paciente)
+        form = ParticipanteForm(request.POST, instance=participante)
 
         if form.is_valid():
             form.save()
-            messages.success(request, 'Paciente atualizado com sucesso.')
-            return redirect('detalhes_paciente', paciente_id=paciente.id)
+            messages.success(request, 'Participante atualizado com sucesso.')
+            return redirect('detalhes_participante', participante_id=participante.id)
     else:
-        form = PacienteForm(instance=paciente)
+        form = ParticipanteForm(instance=participante)
 
     return render(
         request,
-        'editar_paciente.html',
+        'editar_participante.html',
         {
             'form': form,
-            'paciente': paciente
+            'participante': participante,
+            'active_page': 'participantes'
         }
     )
 
 
 @login_required
-def excluir_paciente(request, paciente_id):
-    paciente = get_object_or_404(Paciente, id=paciente_id)
+def excluir_participante(request, participante_id):
+    participante = get_object_or_404(Participante, id=participante_id)
 
     if request.method == 'POST':
-        paciente.delete()
-        messages.success(request, 'Paciente removido com sucesso.')
-        return redirect('listar_pacientes')
+        participante.delete()
+        messages.success(request, 'Participante removido com sucesso.')
+        return redirect('listar_participantes')
 
     return render(
         request,
-        'excluir_paciente.html',
+        'excluir_participante.html',
         {
-            'paciente': paciente
+            'participante': participante,
+            'active_page': 'participantes'
         }
     )
+
 
 @login_required
-def reenviar_link_paciente(request, paciente_id):
-    paciente = get_object_or_404(Paciente, id=paciente_id)
-    coleta_ativa = Coleta.objects.filter(status='em_andamento').first()
+def reenviar_link_participante(request, participante_id):
+    participante = get_object_or_404(Participante, id=participante_id)
+    
+    # 1. Procura uma atividade ativa da Parte 1 vinculada a este participante
+    atividade_chave = Atividade.objects.filter(
+        participante=participante,
+        formulario__parte='P1'
+    ).first()
 
-    if not coleta_ativa:
-        messages.error(request, 'Nenhuma coleta em andamento para gerar o link.')
-        return redirect('listar_pacientes')
+    # 2. Caso o participante não possua nenhuma atividade na Parte 1, busca qualquer atividade vinculada
+    if not atividade_chave:
+        atividade_chave = Atividade.objects.filter(participante=participante).first()
 
-    # Busca se o paciente já tem sessão nesta coleta; se não tiver, cria uma nova.
-    sessao, created = SessaoPaciente.objects.get_or_create(
-        coleta=coleta_ativa,
-        email_paciente=paciente.email,
-        defaults={
-            'fase_atual': 'parte1',
-            'formulario_atual': coleta_ativa.formulario_parte1
-        }
-    )
+    if not atividade_chave:
+        messages.error(request, 'Nenhuma atividade encontrada para gerar o link deste participante.')
+        return redirect('listar_participantes')
 
-    # Gera o link
-    link_formulario = request.build_absolute_uri(
-        reverse('responder_formulario_token', args=[sessao.token_acesso])
+    # 3. Reconstrói a URL de acesso apontando corretamente para o painel geral de cards (Hub)
+    link_painel = request.build_absolute_uri(
+        reverse('painel_participante_token', args=[atividade_chave.token_acesso])
     )
     
-    assunto = 'IARA-Saúde: Acesso ao Questionário (Reenvio)'
-    mensagem = f"""Olá, {paciente.nome}.
+    assunto = 'IARA-Saúde: Acesso ao Painel de Pesquisa (Reenvio)'
+    mensagem = f"""Olá, {participante.nome}.
 
-Aqui está o seu link de acesso para a pesquisa IARA-SAÚDE:
-{link_formulario}
+Aqui está o seu link de acesso atualizado para o painel de questionários da pesquisa IARA-SAÚDE:
+{link_painel}
 
-Este link é seguro, intransferível e salva seu progresso automaticamente.
+Este link é seguro, intransferível e retoma exatamente de onde parou.
 """
     try:
         send_mail(
             subject=assunto,
             message=mensagem,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[paciente.email],
+            recipient_list=[participante.email],
             fail_silently=False,
         )
-        messages.success(request, f'Link reenviado com sucesso para {paciente.email}!')
+        messages.success(request, f'Link do painel reenviado com sucesso para {participante.email}!')
     except Exception as e:
         messages.error(request, f'Erro ao reenviar o e-mail: {e}')
 
-    return redirect('listar_pacientes')
+    return redirect('listar_participantes')

@@ -62,13 +62,13 @@
             {% endif %}
 
             {% if user.tipo_usuario == 'ADM' or user.tipo_usuario == 'PES' or user.tipo_usuario == 'ATE' %}
-            <a href="{% url 'painel_coletas' %}" 
-               class="menu-link {% if active_page == 'coletas' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4">
+            <a href="{% url 'painel_atividades' %}" 
+               class="menu-link {% if active_page == 'atividades' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4">
                 <span class="material-symbols-outlined mr-3 text-[22px]">assignment_add</span>
-                Coletas
+                Atividades
             </a>
-            <a href="{% url 'listar_pacientes' %}" 
-               class="menu-link {% if active_page == 'pacientes' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4">
+            <a href="{% url 'listar_participantes' %}" 
+               class="menu-link {% if active_page == 'participantes' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4">
                 <span class="material-symbols-outlined mr-3 text-[22px]">group</span>
                 Participantes
             </a>

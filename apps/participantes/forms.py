@@ -1,11 +1,11 @@
 from django import forms
-from .models import Paciente
+from .models import Participante
 
 
-class PacienteForm(forms.ModelForm):
+class ParticipanteForm(forms.ModelForm):
 
     class Meta:
-        model = Paciente
+        model = Participante
 
         fields = [
             'nome',
@@ -19,11 +19,13 @@ class PacienteForm(forms.ModelForm):
 
         widgets = {
             'nome': forms.TextInput(attrs={
-                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3'
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3',
+                'placeholder': 'Nome completo'
             }),
 
             'email': forms.EmailInput(attrs={
-                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3'
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3',
+                'placeholder': 'E-mail do participante'
             }),
 
             'data_nascimento': forms.DateInput(attrs={
@@ -40,10 +42,12 @@ class PacienteForm(forms.ModelForm):
             }),
 
             'centro': forms.NumberInput(attrs={
-                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3'
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3',
+                'placeholder': 'Ex: 01'
             }),
 
             'telefone': forms.TextInput(attrs={
-                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3'
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3',
+                'placeholder': '(DD) 90000-0000'
             }),
         }

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Novo Paciente | IARA-SAÚDE
+Novo Participante | IARA-SAÚDE
 {% endblock %}
 
 {% block content %}
@@ -10,11 +10,11 @@ Novo Paciente | IARA-SAÚDE
 
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-800">
-            Novo Paciente
+            Novo Participante
         </h1>
 
         <p class="text-gray-500 mt-2">
-            Cadastre um novo paciente para iniciar o processo de coleta.
+            Cadastre um novo Participante para iniciar o processo de coleta.
         </p>
     </div>
 
@@ -94,7 +94,7 @@ Novo Paciente | IARA-SAÚDE
             <!-- Botões -->
             <div class="flex justify-end gap-3 mt-10 border-t pt-6">
 
-                <a href="{% url 'listar_pacientes' %}"
+                <a href="{% url 'listar_participantes' %}"
                    class="px-5 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition">
 
                     Cancelar
@@ -104,7 +104,7 @@ Novo Paciente | IARA-SAÚDE
                 <button type="submit"
                         class="px-5 py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition">
 
-                    Salvar Paciente
+                    Salvar Participante
 
                 </button>
 
@@ -117,3 +117,4 @@ Novo Paciente | IARA-SAÚDE
 </div>
 
 {% endblock %}
+

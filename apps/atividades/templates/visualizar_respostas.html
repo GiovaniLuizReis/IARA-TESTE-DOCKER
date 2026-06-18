@@ -1,45 +1,61 @@
 {% extends 'base.html' %}
 
-{% block title %}Respostas do Paciente{% endblock %}
+{% block title %}Respostas — {{ atividade.participante.nome }}{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto">
-    <div class="mb-8 flex items-center justify-between">
-        <div>
-            <a href="{% url 'detalhe_coleta' sessao.coleta.id %}" class="text-sm text-emerald-600 hover:underline">← Voltar para a Coleta</a>
-            <h1 class="text-3xl font-bold text-gray-800 mt-2">Relatório de Respostas</h1>
-            <p class="text-gray-500">Paciente: <span class="font-semibold">{{ sessao.email_paciente }}</span></p>
-        </div>
-        <div>
-            <span class="bg-blue-100 text-blue-800 px-4 py-2 rounded-xl text-sm font-bold">Fase: {{ sessao.get_fase_atual_display }}</span>
-        </div>
+    <div class="mb-8">
+        <a href="{% url 'detalhe_participante_atividades' atividade.participante.id %}" class="text-sm text-emerald-600 hover:underline">← Voltar às atividades</a>
+        <h1 class="text-3xl font-bold text-gray-800 mt-2">Respostas Registadas</h1>
+        <p class="text-gray-500 mt-1">
+            Participante: <span class="font-semibold text-gray-700">{{ atividade.participante.nome }}</span> | 
+            Instrumento: <span class="font-semibold text-gray-700">{{ formulario.nome }}</span>
+        </p>
     </div>
 
     <div class="space-y-6">
-        {% for resposta in respostas %}
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                    {{ resposta.pergunta.get_tipo_display }} | Bloco: {{ resposta.pergunta.bloco.titulo }}
-                </p>
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ resposta.pergunta.titulo }}</h3>
+        {% for pergunta in perguntas %}
+            <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Questão {{ forloop.counter }}</span>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ pergunta.titulo }}</h3>
                 
-                <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                    {% if resposta.opcoes_selecionadas.exists %}
-                        <ul class="list-disc list-inside text-emerald-700 font-medium">
-                            {% for opcao in resposta.opcoes_selecionadas.all %}
-                                <li>{{ opcao.texto }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% elif resposta.valor_texto %}
-                        <p class="text-gray-800 font-medium whitespace-pre-wrap">{{ resposta.valor_texto }}</p>
+                {% if pergunta.subtitulo %}
+                    <p class="text-sm text-gray-500 mb-4">{{ pergunta.subtitulo }}</p>
+                {% endif %}
+
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mt-4">
+                    {% if pergunta.resposta_registada %}
+                        
+                        {% if pergunta.tipo == 'radio' or pergunta.tipo == 'checkbox' or pergunta.tipo == 'select' %}
+                            <ul class="space-y-3">
+                                {% for opcao in pergunta.opcoes.all %}
+                                    <li class="flex items-center gap-3 text-base font-medium text-gray-700">
+                                        <input type="{% if pergunta.tipo == 'checkbox' %}checkbox{% else %}radio{% endif %}" 
+                                               {% if opcao in pergunta.resposta_registada.opcoes_selecionadas.all %}checked{% endif %} 
+                                               disabled 
+                                               class="h-5 w-5 text-emerald-600 border-gray-300 rounded focus:ring-0 cursor-not-allowed">
+                                        
+                                        <span class="{% if opcao in pergunta.resposta_registada.opcoes_selecionadas.all %}text-emerald-700 font-bold{% endif %}">
+                                            {{ opcao.texto }}
+                                        </span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        
+                        {% else %}
+                            <p class="text-base text-gray-800 font-medium whitespace-pre-line">
+                                {{ pergunta.resposta_registada.valor_texto|default:"—" }}
+                            </p>
+                        {% endif %}
+
                     {% else %}
-                        <p class="text-gray-400 italic">Nenhuma resposta registrada.</p>
+                        <p class="text-sm text-gray-400 italic">Esta questão não foi respondida.</p>
                     {% endif %}
                 </div>
             </div>
         {% empty %}
-            <div class="bg-white p-12 rounded-2xl shadow-sm border border-gray-200 text-center">
-                <p class="text-gray-500 text-lg">Este paciente ainda não respondeu a nenhuma pergunta.</p>
+            <div class="text-center py-16 bg-white rounded-2xl border border-gray-200">
+                <p class="text-gray-500 italic">Nenhuma pergunta estruturada encontrada para este formulário.</p>
             </div>
         {% endfor %}
     </div>

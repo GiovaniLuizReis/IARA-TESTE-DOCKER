@@ -1,192 +1,205 @@
 import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-from apps.formularios.models import Bloco, Pergunta, OpcaoPergunta, RegraPulo
-from .models import Coleta, SessaoPaciente, Resposta
-from .forms import ColetaForm
+from django.contrib import messages
 
-@login_required
-def cadastrar_coleta(request):
-    if request.method == 'POST':
-        form = ColetaForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Nova campanha de coleta iniciada com sucesso.')
-            return redirect('painel_coletas')
-    else:
-        form = ColetaForm()
-    return render(request, 'cadastrar_coleta.html', {'form': form, 'active_page': 'coletas'})
+from .models import Atividade, Resposta, HistoricoAtividade
+from apps.participantes.models import Participante
+from apps.formularios.models import Formulario, Pergunta, OpcaoPergunta
 
 
 @login_required
-def painel_coletas(request):
-    coletas = Coleta.objects.all().order_by('-criado_em')
-    return render(request, 'painel_coletas.html', {'coletas': coletas, 'active_page': 'coletas'})
-
-@login_required
-def detalhe_coleta(request, coleta_id):
-    coleta = get_object_or_404(Coleta, id=coleta_id)
-    sessoes = coleta.sessoes.all().order_by('-ultima_interacao')
-    return render(request, 'detalhe_coleta.html', {'coleta': coleta, 'sessoes': sessoes, 'active_page': 'coletas'})
-
-@login_required
-def pesquisador_terminar_resposta(request, sessao_id):
-    sessao = get_object_or_404(SessaoPaciente, id=sessao_id)
-    sessao.preenchido_por = 'pesquisador'
-    
-    if not sessao.formulario_atual:
-        sessao.formulario_atual = sessao.coleta.formulario_parte1 if sessao.fase_atual == 'parte1' else sessao.coleta.formulario_parte2
-        sessao.save()
-        
-    return gerenciar_fluxo_motor(request, sessao, template_name='responder_bloco_pesquisador.html', redirecionamento='pesquisador_terminar_resposta')
-
-def responder_formulario_token(request, token):
-    sessao = get_object_or_404(SessaoPaciente, token_acesso=token)
-    
-    if sessao.concluida or sessao.fase_atual == 'parte2':
-        return redirect('resposta_sucesso', token=token)
-        
-    sessao.preenchido_por = 'paciente'
-    if not sessao.formulario_atual:
-        sessao.formulario_atual = sessao.coleta.formulario_parte1
-        sessao.save()
-        
-    return gerenciar_fluxo_motor(request, sessao, template_name='responder_bloco.html', redirecionamento='responder_formulario_token', use_token=True)
-
-def gerenciar_fluxo_motor(request, sessao, template_name, redirecionamento, use_token=False):
-    formulario = sessao.formulario_atual
-    
-    if not sessao.iniciada_em:
-        sessao.iniciada_em = timezone.now()
-        sessao.save()
-
-    if not sessao.bloco_atual:
-        bloco_atual = formulario.blocos.order_by('ordem').first()
-        sessao.bloco_atual = bloco_atual
-        sessao.save()
-    else:
-        bloco_atual = sessao.bloco_atual
-
-    perguntas = bloco_atual.perguntas.all().prefetch_related('opcoes')
-
-    if request.method == 'POST':
-        erros = []
-        respostas_a_salvar = []
-
-        for pergunta in perguntas:
-            campo_nome = f'pergunta_{pergunta.id}'
-            
-            if pergunta.tipo == 'checkbox':
-                valores = request.POST.getlist(campo_nome)
-                if pergunta.obrigatoria and not valores:
-                    erros.append(f'A pergunta "{pergunta.titulo}" é obrigatória.')
-                respostas_a_salvar.append((pergunta, valores, 'multipla'))
-            elif pergunta.tipo == 'matrix':
-                opcoes_m = pergunta.opcoes.all()
-                valores_m = {op.id: request.POST.get(f'pergunta_{pergunta.id}_linha_{op.id}') for op in opcoes_m if request.POST.get(f'pergunta_{pergunta.id}_linha_{op.id}')}
-                if pergunta.obrigatoria and len(valores_m) < opcoes_m.count():
-                    erros.append(f'Preencha todas as linhas da matriz: "{pergunta.titulo}".')
-                respostas_a_salvar.append((pergunta, valores_m, 'matriz'))
-            else:
-                valor = request.POST.get(campo_nome)
-                if pergunta.obrigatoria and not valor:
-                    erros.append(f'A pergunta "{pergunta.titulo}" é obrigatória.')
-                respostas_a_salvar.append((pergunta, valor, 'simples'))
-
-        if erros:
-            for erro in erros:
-                messages.error(request, erro)
-        else:
-            for pergunta, dado, tipo_resp in respostas_a_salvar:
-                resposta_obj, _ = Resposta.objects.get_or_create(sessao=sessao, pergunta=pergunta)
-                if tipo_resp == 'multipla':
-                    resposta_obj.opcoes_selecionadas.set(OpcaoPergunta.objects.filter(id__in=dado))
-                    resposta_obj.valor_texto = ", ".join(dado)
-                elif tipo_resp == 'matriz':
-                    resposta_obj.valor_texto = json.dumps(dado)
-                else:
-                    resposta_obj.valor_texto = dado
-                    if pergunta.tipo in ['radio', 'select']:
-                        op_sel = OpcaoPergunta.objects.filter(id=dado).first()
-                        if op_sel:
-                            resposta_obj.opcoes_selecionadas.set([op_sel])
-                resposta_obj.save()
-
-            proximo_bloco = None
-            pulo_executado = False
-            for pergunta in perguntas:
-                regras = RegraPulo.objects.filter(pergunta_origem=pergunta)
-                for regra in regras:  # ← CORRIGIDO AQUI
-                    resp_atual = Resposta.objects.filter(sessao=sessao, pergunta=pergunta).first()
-                    if resp_atual and (regra.opcao_condicao in resp_atual.opcoes_selecionadas.all() or resp_atual.valor_texto == str(regra.opcao_condicao.id)):
-                        proximo_bloco = regra.pergunta_destino.bloco
-                        pulo_executado = True
-                        break
-                if pulo_executado: break
-
-            if not pulo_executado:
-                proximo_bloco = formulario.blocos.filter(ordem__gt=bloco_atual.ordem).order_by('ordem').first()
-
-            param_redirect = {'token': sessao.token_acesso} if use_token else {'sessao_id': sessao.id}
-
-            if proximo_bloco:
-                sessao.bloco_atual = proximo_bloco
-                sessao.save()
-                return redirect(redirecionamento, **param_redirect)
-            else:
-                if sessao.fase_atual == 'parte1':
-                    sessao.fase_atual = 'parte2'
-                    sessao.formulario_atual = sessao.coleta.formulario_parte2
-                    sessao.bloco_atual = None
-                    sessao.save()
-                    if use_token:
-                        return redirect('resposta_sucesso', token=sessao.token_acesso)
-                    else:
-                        messages.success(request, 'Parte 1 concluída. Módulo transferido para Parte 2 Presencial.')
-                        return redirect('detalhe_coleta', coleta_id=sessao.coleta.id)
-                else:
-                    sessao.fase_atual = 'finalizado'
-                    sessao.concluida = True
-                    sessao.bloco_atual = None
-                    sessao.formulario_atual = None
-                    sessao.save()
-                    if use_token:
-                        return redirect('resposta_sucesso', token=sessao.token_acesso)
-                    else:
-                        messages.success(request, 'Fluxo presencial de coleta finalizado com sucesso.')
-                        return redirect('detalhe_coleta', coleta_id=sessao.coleta.id)
-
-    return render(request, template_name, {
-        'formulario': formulario, 'bloco': bloco_atual, 'perguntas': perguntas, 'sessao': sessao, 'active_page': 'coletas'
+def painel_atividades(request):
+    """Lista todos os participantes para monitorização da equipa de pesquisa."""
+    participantes = Participante.objects.all().order_by('-id')
+    return render(request, 'painel_atividades.html', {
+        'participantes': participantes, 
+        'active_page': 'atividades'
     })
 
-def resposta_sucesso(request, token):
-    sessao = get_object_or_404(SessaoPaciente, token_acesso=token)
-    return render(request, 'resposta_sucesso.html', {'sessao': sessao})
 
 @login_required
-def visualizar_respostas(request, sessao_id):
-    sessao = get_object_or_404(SessaoPaciente, id=sessao_id)
-    # Puxa todas as respostas dadas nesta sessão
-    respostas = sessao.respostas.all().select_related('pergunta').prefetch_related('opcoes_selecionadas')
+def detalhe_participante_atividades(request, participante_id):
+    """Exibe o painel de gerenciamento de cards de um participante específico."""
+    participante = get_object_or_404(Participante, id=participante_id)
+    atividades = participante.atividades.all().select_related('formulario')
+    return render(request, 'detalhe_participante.html', {
+        'participante': participante, 
+        'atividades': atividades, 
+        'active_page': 'atividades'
+    })
+
+
+@login_required
+def pesquisador_assumir_atividade(request, atividade_id):
+    """Permite ao pesquisador assumir e preencher o formulário junto com o participante."""
+    atividade = get_object_or_404(Atividade, id=atividade_id)
+    
+    HistoricoAtividade.objects.create(
+        atividade=atividade,
+        acao="Pesquisador assumiu o preenchimento",
+        usuario_responsavel=request.user
+    )
+    return motor_resposta(request, atividade, use_token=False)
+
+
+@login_required
+def visualizar_respostas(request, atividade_id):
+    """Exibe um relatório de leitura estático com as respostas guardadas de um formulário concluído."""
+    atividade = get_object_or_404(Atividade, id=atividade_id)
+    formulario = atividade.formulario
+    
+    # Carrega perguntas e opções otimizando o acesso ao banco
+    perguntas = formulario.perguntas.all().prefetch_related('opcoes')
+    
+    # Mapeia as respostas dadas nesta atividade
+    respostas_dadas = {
+        resp.pergunta_id: resp 
+        for resp in atividade.respostas.all().prefetch_related('opcoes_selecionadas')
+    }
+    
+    # Vincula a resposta diretamente ao objeto da pergunta para simplificar o loop no HTML
+    for pergunta in perguntas:
+        pergunta.resposta_registada = respostas_dadas.get(pergunta.id)
     
     return render(request, 'visualizar_respostas.html', {
-        'sessao': sessao,
-        'respostas': respostas,
-        'active_page': 'coletas'
+        'atividade': atividade,
+        'formulario': formulario,
+        'perguntas': perguntas
     })
 
+
 @login_required
-def editar_coleta(request, coleta_id):
-    coleta = get_object_or_404(Coleta, id=coleta_id)
+def gerar_atividades_p2(request, participante_id):
+    """Atribui ao participante qualquer formulário ativo que ele ainda não tenha recebido."""
     if request.method == 'POST':
-        form = ColetaForm(request.POST, instance=coleta)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Campanha de coleta atualizada com sucesso.')
-            return redirect('painel_coletas')
-    else:
-        form = ColetaForm(instance=coleta)
-    return render(request, 'editar_coleta.html', {'form': form, 'coleta': coleta, 'active_page': 'coletas'})
+        participante = get_object_or_404(Participante, id=participante_id)
+        
+        # Procura por todos os formulários ativos no sistema (P1, P2, exames, etc.)
+        formularios_ativos = Formulario.objects.filter(ativo=True)
+        
+        if not formularios_ativos.exists():
+            messages.warning(request, 'Nenhum formulário ou instrumento de recolha está ativo no sistema.')
+            return redirect('detalhe_participante_atividades', participante_id=participante.id)
+            
+        criados = 0
+        for formulario in formularios_ativos:
+            # get_or_create impede a duplicação se o instrumento já foi associado ao participante
+            obj, created = Atividade.objects.get_or_create(
+                participante=participante,
+                formulario=formulario,
+                defaults={'status': 'nao_iniciado'}
+            )
+            if created:
+                criados += 1
+                
+        if criados > 0:
+            messages.success(request, f'{criados} nova(s) atividade(s) atribuída(s) com sucesso!')
+        else:
+            messages.info(request, 'O participante já possui todos os formulários ativos atribuídos.')
+            
+    return redirect('detalhe_participante_atividades', participante_id=participante.id)
+
+
+def painel_participante_token(request, token):
+    """Hub central de cards de acesso seguro para o participante preencher online (Parte 1)."""
+    atividade_ref = get_object_or_404(Atividade, token_acesso=token)
+    participante = activity_ref = atividade_ref.participante
+    
+    atividades = Atividade.objects.filter(
+        participante=participante,
+        formulario__parte='P1'
+    ).select_related('formulario').order_by('formulario__ordem', 'id')
+    
+    return render(request, 'painel_participante.html', {
+        'participante': participante,
+        'atividades': atividades
+    })
+
+
+def responder_atividade_token(request, token):
+    """Direciona o participante ao questionário passo a passo se não estiver concluído."""
+    atividade = get_object_or_404(Atividade, token_acesso=token)
+    
+    if atividade.status == 'concluido':
+        return redirect('painel_participante_token', token=atividade.token_acesso)
+        
+    return motor_resposta(request, atividade, use_token=True)
+
+
+def motor_resposta(request, atividade, use_token=False):
+    """Mecanismo interno comum para renderização de formulários (Pesquisador ou Participante)."""
+    formulario = atividade.formulario
+    perguntas = formulario.perguntas.all().prefetch_related('opcoes')
+    
+    if atividade.status == 'nao_iniciado':
+        atividade.status = 'em_andamento'
+        atividade.data_inicio = timezone.now()
+        atividade.save()
+        
+        HistoricoAtividade.objects.create(
+            atividade=atividade,
+            acao="Atividade Iniciada",
+            usuario_responsavel=request.user if not use_token else None
+        )
+
+    respostas_dadas = {resp.pergunta_id: resp for resp in atividade.respostas.all()}
+
+    return render(request, 'responder_atividade.html', {
+        'atividade': atividade, 
+        'formulario': formulario, 
+        'perguntas': perguntas, 
+        'respostas_dadas': respostas_dadas,
+        'use_token': use_token
+    })
+
+
+def resposta_sucesso(request):
+    """Página de conclusão de fluxos externos."""
+    return render(request, 'resposta_sucesso.html')
+
+
+@csrf_exempt
+def salvar_resposta_assincrona(request, atividade_id):
+    """Endpoint AJAX para gravação de respostas em tempo real pergunta por pergunta."""
+    if request.method == 'POST':
+        atividade = get_object_or_404(Atividade, id=atividade_id)
+        dados = json.loads(request.body)
+        
+        pergunta_id = dados.get('pergunta_id')
+        valor = dados.get('valor')
+        tipo = dados.get('tipo')
+        
+        pergunta = get_object_or_404(Pergunta, id=pergunta_id)
+        resposta_obj, _ = Resposta.objects.get_or_create(atividade=atividade, pergunta=pergunta)
+
+        if tipo == 'checkbox':
+            resposta_obj.opcoes_selecionadas.set(OpcaoPergunta.objects.filter(id__in=valor))
+            resposta_obj.valor_texto = ", ".join(map(str, valor))
+        elif tipo in ['radio', 'select']:
+            op_sel = OpcaoPergunta.objects.filter(id=valor).first()
+            if op_sel:
+                resposta_obj.opcoes_selecionadas.set([op_sel])
+                resposta_obj.valor_texto = str(valor)
+        else:
+            resposta_obj.valor_texto = str(valor)
+            
+        resposta_obj.save()
+
+        # Recalcular métricas de progresso do instrumento
+        total_perguntas = atividade.formulario.perguntas.count()
+        respostas_contadas = atividade.respostas.count()
+        if total_perguntas > 0:
+            progresso = int((respostas_contadas / total_perguntas) * 100)
+            atividade.progresso_percentual = progresso
+            if progresso >= 100:
+                atividade.status = 'concluido'
+                atividade.data_fim = timezone.now()
+            atividade.save()
+
+        return JsonResponse({'status': 'success', 'progresso': atividade.progresso_percentual})
+    
+    return JsonResponse({'status': 'error'}, status=400)

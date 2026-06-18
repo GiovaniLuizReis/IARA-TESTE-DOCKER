@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Respondendo: {{ formulario.nome }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+    <header class="bg-white border-b border-gray-200 py-4 shadow-sm">
+        <div class="max-w-3xl mx-auto px-4 flex justify-between items-center">
+            <h1 class="font-bold text-gray-800">{{ formulario.nome }}</h1>
+            <div class="text-sm text-gray-500 font-medium">
+                Progresso: <span id="texto-progresso">{{ atividade.progresso_percentual }}</span>%
+            </div>
+        </div>
+        <div class="w-full bg-gray-100 h-1.5 mt-4">
+            <div id="barra-progresso" class="bg-emerald-500 h-1.5 transition-all duration-500" style="width: {{ atividade.progresso_percentual }}%"></div>
+        </div>
+    </header>
+
+    <main class="flex-1 flex items-center justify-center p-4">
+        <div class="w-full max-w-2xl bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden relative min-h-[400px] flex flex-col">
+            
+            <div id="loading-overlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 hidden flex-col items-center justify-center">
+                <div class="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                <p class="mt-2 text-sm text-emerald-700 font-medium text-center">Salvando...</p>
+            </div>
+
+            <div class="p-8 flex-1">
+                {% for pergunta in perguntas %}
+                
+                <div class="pergunta-card {% if not forloop.first %}hidden{% endif %}" data-index="{{ forloop.counter0 }}" data-id="{{ pergunta.id }}">
+                    
+                    <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2 block">
+                        Pergunta {{ forloop.counter }} de {{ perguntas|length }}
+                    </span>
+                    
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ pergunta.titulo }}</h2>
+                    
+                    {% if pergunta.subtitulo %}
+                        <p class="text-gray-500 mb-6">{{ pergunta.subtitulo }}</p>
+                    {% else %}
+                        <div class="mb-6"></div>
+                    {% endif %}
+
+                    <div class="mt-4">
+                        {% if pergunta.tipo == 'texto' %}
+                            <textarea id="input_{{ pergunta.id }}" class="w-full border rounded-xl p-4 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all shadow-sm" rows="4" placeholder="Digite sua resposta aqui..."></textarea>
+                        
+                        {% elif pergunta.tipo == 'numero' %}
+                            <input type="number" id="input_{{ pergunta.id }}" class="w-full md:w-1/2 border rounded-xl p-4 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all shadow-sm text-lg" placeholder="Ex: 42">
+                        
+                        {% elif pergunta.tipo == 'data' %}
+                            <input type="date" id="input_{{ pergunta.id }}" class="w-full md:w-1/2 border rounded-xl p-4 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all shadow-sm text-lg">
+                        
+                        {% elif pergunta.tipo == 'radio' %}
+                            <div class="space-y-3">
+                            {% for opcao in pergunta.opcoes.all %}
+                                <label class="flex items-center p-4 border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-all has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
+                                    <input type="radio" name="input_{{ pergunta.id }}" value="{{ opcao.id }}" class="h-5 w-5 text-emerald-600 focus:ring-emerald-500 border-gray-300"> 
+                                    <span class="ml-3 text-gray-700 font-medium text-lg">{{ opcao.texto }}</span>
+                                </label>
+                            {% endfor %}
+                            </div>
+                        
+                        {% elif pergunta.tipo == 'checkbox' %}
+                            <div class="space-y-3">
+                            {% for opcao in pergunta.opcoes.all %}
+                                <label class="flex items-center p-4 border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-all has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
+                                    <input type="checkbox" name="input_{{ pergunta.id }}" value="{{ opcao.id }}" class="h-5 w-5 rounded text-emerald-600 focus:ring-emerald-500 border-gray-300"> 
+                                    <span class="ml-3 text-gray-700 font-medium text-lg">{{ opcao.texto }}</span>
+                                </label>
+                            {% endfor %}
+                            </div>
+
+                        {% elif pergunta.tipo == 'select' %}
+                            <select id="input_{{ pergunta.id }}" class="w-full border rounded-xl p-4 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-sm text-lg bg-white">
+                                <option value="">Selecione uma opção...</option>
+                                {% for opcao in pergunta.opcoes.all %}
+                                    <option value="{{ opcao.id }}">{{ opcao.texto }}</option>
+                                {% endfor %}
+                            </select>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="bg-gray-50 p-6 border-t border-gray-100 flex justify-between items-center">
+                <button type="button" id="btn-voltar" class="px-6 py-3 text-gray-500 font-medium hover:text-gray-800 transition-colors hidden">
+                    ← Anterior
+                </button>
+                
+                <button type="button" id="btn-avancar" class="ml-auto bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-bold shadow-md transition-colors flex items-center gap-2">
+                    Próxima <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const cards = document.querySelectorAll('.pergunta-card');
+            const btnAvançar = document.getElementById('btn-avancar');
+            const btnVoltar = document.getElementById('btn-voltar');
+            const loading = document.getElementById('loading-overlay');
+            const atividadeId = "{{ atividade.id }}";
+            let currentIndex = 0;
+
+            // Função que atualiza a tela para mostrar apenas a pergunta atual
+            function atualizarVisor() {
+                cards.forEach((card, index) => {
+                    if (index === currentIndex) {
+                        card.classList.remove('hidden');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+
+                // Controla o botão "Anterior"
+                if (currentIndex === 0) {
+                    btnVoltar.classList.add('hidden');
+                } else {
+                    btnVoltar.classList.remove('hidden');
+                }
+
+                // Controla se o botão principal é "Próxima" ou "Finalizar"
+                if (currentIndex === cards.length - 1) {
+                    btnAvançar.innerHTML = 'Finalizar Formulário <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+                    btnAvançar.classList.replace('bg-emerald-600', 'bg-blue-600');
+                    btnAvançar.classList.replace('hover:bg-emerald-700', 'hover:bg-blue-700');
+                } else {
+                    btnAvançar.innerHTML = 'Próxima <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>';
+                    btnAvançar.classList.replace('bg-blue-600', 'bg-emerald-600');
+                    btnAvançar.classList.replace('hover:bg-blue-700', 'hover:bg-emerald-700');
+                }
+            }
+
+            // Função para pegar a resposta preenchida na tela
+            function obterValorResposta(perguntaId, tipo) {
+                if (tipo === 'radio') {
+                    const selecionado = document.querySelector(`input[name="input_${perguntaId}"]:checked`);
+                    return selecionado ? selecionado.value : null;
+                } else if (tipo === 'checkbox') {
+                    const selecionados = Array.from(document.querySelectorAll(`input[name="input_${perguntaId}"]:checked`));
+                    return selecionados.map(cb => cb.value);
+                } else {
+                    const input = document.getElementById(`input_${perguntaId}`);
+                    return input ? input.value : null;
+                }
+            }
+
+            // Função assíncrona que envia a resposta para o Django salvar no banco
+            async function salvarRespostaAtual() {
+                const cardAtual = cards[currentIndex];
+                const perguntaId = cardAtual.getAttribute('data-id');
+                
+                // Tenta descobrir o tipo de input olhando pro HTML dele
+                let tipo = 'texto';
+                if (cardAtual.querySelector('input[type="radio"]')) tipo = 'radio';
+                else if (cardAtual.querySelector('input[type="checkbox"]')) tipo = 'checkbox';
+                else if (cardAtual.querySelector('select')) tipo = 'select';
+                
+                const valor = obterValorResposta(perguntaId, tipo);
+
+                // Se houver valor preenchido, envia para a API
+                if (valor && valor.length !== 0) {
+                    loading.classList.replace('hidden', 'flex'); // Mostra a tela de carregamento rápida
+                    
+                    try {
+                        const response = await fetch(`{% url 'salvar_resposta_assincrona' atividade.id %}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}' // Proteção de segurança do Django
+                            },
+                            body: JSON.stringify({
+                                pergunta_id: perguntaId,
+                                valor: valor,
+                                tipo: tipo
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        if (data.status === 'success') {
+                            // Atualiza a barra de progresso no topo da tela instantaneamente
+                            document.getElementById('barra-progresso').style.width = `${data.progresso}%`;
+                            document.getElementById('texto-progresso').innerText = data.progresso;
+                        }
+                    } catch (error) {
+                        console.error("Erro ao salvar:", error);
+                    } finally {
+                        loading.classList.replace('flex', 'hidden');
+                    }
+                }
+            }
+
+            // Ação do Botão Próxima
+            btnAvançar.addEventListener('click', async function() {
+                await salvarRespostaAtual();
+                
+                if (currentIndex < cards.length - 1) {
+                    currentIndex++;
+                    atualizarVisor();
+                } else {
+                    // Chegou na última tela e clicou em finalizar
+                    window.location.href = "{% url 'resposta_sucesso' %}";
+                }
+            });
+
+            // Ação do Botão Anterior
+            btnVoltar.addEventListener('click', function() {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    atualizarVisor();
+                }
+            });
+
+            // Inicializa a tela garantindo que só a primeira aparece
+            atualizarVisor();
+        });
+    </script>
+</body>
+</html>

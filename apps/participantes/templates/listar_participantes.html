@@ -13,18 +13,18 @@ Pacientes | IARA-SAÚDE
 
         <div>
             <h1 class="text-3xl font-bold text-gray-800">
-                Pacientes
+                Participantes
             </h1>
 
             <p class="text-gray-500 mt-1">
-                Gerencie os pacientes cadastrados no sistema.
+                Gerencie os participantes cadastrados no sistema.
             </p>
         </div>
 
-        <a href="{% url 'cadastrar_paciente' %}"
+        <a href="{% url 'cadastrar_participante' %}"
            class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-medium transition">
 
-            Novo Paciente
+            Novo Participante
 
         </a>
 
@@ -46,11 +46,11 @@ Pacientes | IARA-SAÚDE
 
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
             <p class="text-gray-500 text-sm">
-                Total de Pacientes
+                Total de Participantes
             </p>
 
             <h2 class="text-3xl font-bold mt-2">
-                {{ pacientes.count }}
+                {{ participantes.count }}
             </h2>
         </div>
 
@@ -81,7 +81,7 @@ Pacientes | IARA-SAÚDE
 
         <div class="p-5 border-b">
             <h2 class="font-semibold text-lg">
-                Lista de Pacientes
+                Lista de Participantes
             </h2>
         </div>
 
@@ -123,28 +123,28 @@ Pacientes | IARA-SAÚDE
 
                 <tbody>
 
-                    {% for paciente in pacientes %}
+                    {% for participante in participantes %}
 
                     <tr class="border-t hover:bg-gray-50">
 
                         <td class="px-6 py-4 font-medium">
-                            {{ paciente.identificacao }}
+                            {{ participante.identificacao }}
                         </td>
 
                         <td class="px-6 py-4">
-                            {{ paciente.nome }}
+                            {{ participante.nome }}
                         </td>
 
                         <td class="px-6 py-4">
-                            {{ paciente.email }}
+                            {{ participante.email }}
                         </td>
 
                         <td class="px-6 py-4">
-                            {{ paciente.estado }}
+                            {{ participante.estado }}
                         </td>
 
                         <td class="px-6 py-4">
-                            {{ paciente.centro }}
+                            {{ participante.centro }}
                         </td>
 
                         <td class="px-6 py-4">
@@ -165,9 +165,9 @@ Pacientes | IARA-SAÚDE
 
                                 </a>
 
-                                <a href="{% url 'reenviar_link_paciente' paciente.id %}"
+                                <a href="{% url 'reenviar_link_participante' participante.id %}"
                                 class="bg-purple-100 text-purple-700 px-3 py-2 rounded-lg text-sm hover:bg-purple-200 font-medium transition-colors"
-                                onclick="return confirm('Deseja reenviar o link de acesso para o e-mail deste paciente?');">
+                                onclick="return confirm('Deseja reenviar o link de acesso para o e-mail deste participante?');">
                                     Reenviar Link
                                 </a>
 
@@ -183,7 +183,7 @@ Pacientes | IARA-SAÚDE
 
                         <td colspan="6" class="text-center py-10 text-gray-500">
 
-                            Nenhum paciente cadastrado.
+                            Nenhum participante cadastrado.
 
                         </td>
 

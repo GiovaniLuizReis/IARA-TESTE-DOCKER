@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class Paciente(models.Model):
+class Participante(models.Model):
 
     SEXO = (
         ('M', 'Masculino'),
@@ -60,7 +60,7 @@ class Paciente(models.Model):
 
         if not self.identificacao:
 
-            ultimo = Paciente.objects.filter(
+            ultimo = Participante.objects.filter(
                 estado=self.estado,
                 centro=self.centro
             ).count() + 1

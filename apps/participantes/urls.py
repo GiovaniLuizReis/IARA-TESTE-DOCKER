@@ -6,25 +6,26 @@ urlpatterns = [
 
     path(
         '',
-        views.listar_pacientes,
-        name='listar_pacientes'
+        views.listar_participantes,
+        name='listar_participantes'
     ),
 
     path(
         'novo/',
-        views.cadastrar_paciente,
-        name='cadastrar_paciente'
+        views.cadastrar_participante,
+        name='cadastrar_participante'
     ),
 
     path(
-        '<int:paciente_id>/',
-        views.detalhes_paciente,
-        name='detalhes_paciente'
+        '<int:participante_id>/',
+        views.detalhes_participante,
+        name='detalhes_participante'
     ),
     path(
-        '<int:paciente_id>/reenviar-link/',
-        views.reenviar_link_paciente,
-        name='reenviar_link_paciente'
+        '<int:participante_id>/reenviar-link/',
+        views.reenviar_link_participante,
+        name='reenviar_link_participante'
     ),
+    path('<int:participante_id>/excluir/', views.excluir_participante, name='excluir_participante'),
 
 ]

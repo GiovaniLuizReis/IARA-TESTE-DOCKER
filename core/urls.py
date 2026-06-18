@@ -35,9 +35,9 @@ urlpatterns = [
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('apps.usuarios.urls')),
-    path('pacientes/', include('apps.pacientes.urls')),
+    path('participantes/', include('apps.participantes.urls')),
     path('formularios/', include('apps.formularios.urls')),
-    path('coletas/', include('apps.coletas.urls')),
+    path('atividades/', include('apps.atividades.urls')),
     path('dashboard/', include('apps.dashboard.urls')),
     # path('', include('pages.urls')),
 ]

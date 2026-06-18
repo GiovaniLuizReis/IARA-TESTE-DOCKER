@@ -1,0 +1,93 @@
+{% extends 'base_formulario.html' %}
+
+{% block title %}Preview: {{ formulario.nome }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto my-4">
+    
+    <div class="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl mb-8 flex items-center justify-between shadow-sm">
+        <div>
+            <strong class="font-bold">Modo de Visualização (Preview)</strong>
+            <p class="text-sm">Você está vendo o formulário como o paciente verá. As respostas preenchidas aqui não serão salvas.</p>
+        </div>
+        <button onclick="window.parent.fecharModalPreview ? window.parent.fecharModalPreview() : window.close()" class="bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-lg font-medium text-sm transition-colors">
+            Fechar Preview
+        </button>
+    </div>
+
+    <div class="mb-8 text-center">
+        <h1 class="text-3xl font-bold text-gray-900">{{ formulario.nome }}</h1>
+        <p class="text-gray-500 mt-2">{{ formulario.descricao }}</p>
+    </div>
+
+    <div class="space-y-6">
+        {% for pergunta in perguntas %}
+            <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm relative overflow-hidden">
+                
+                {% if pergunta.obrigatoria %}
+                <div class="absolute top-0 right-0 bg-red-50 text-red-600 text-xs font-bold px-3 py-1 rounded-bl-lg border-b border-l border-red-100">
+                    Obrigatório
+                </div>
+                {% endif %}
+
+                <p class="font-bold text-lg text-gray-800">{{ pergunta.titulo }}</p>
+                {% if pergunta.subtitulo %}
+                    <p class="text-gray-500 text-sm mt-1 mb-4">{{ pergunta.subtitulo }}</p>
+                {% endif %}
+
+                <div class="mt-4">
+                    {% if pergunta.tipo == 'texto' %}
+                        <textarea class="w-full border rounded-xl p-3 border-gray-300 focus:ring-emerald-500 focus:border-emerald-500" rows="3" placeholder="Sua resposta aqui..."></textarea>
+                    
+                    {% elif pergunta.tipo == 'numero' %}
+                        <input type="number" class="w-full md:w-1/3 border rounded-xl p-3 border-gray-300 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Ex: 42">
+                    
+                    {% elif pergunta.tipo == 'data' %}
+                        <input type="date" class="w-full md:w-1/3 border rounded-xl p-3 border-gray-300 focus:ring-emerald-500 focus:border-emerald-500">
+                    
+                    {% elif pergunta.tipo == 'radio' %}
+                        <div class="space-y-2">
+                        {% for opcao in pergunta.opcoes.all %}
+                            <label class="flex items-center p-3 border border-gray-100 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors">
+                                <input type="radio" name="preview_pergunta_{{ pergunta.id }}" class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300"> 
+                                <span class="ml-3 text-gray-700">{{ opcao.texto }}</span>
+                            </label>
+                        {% endfor %}
+                        </div>
+                    
+                    {% elif pergunta.tipo == 'checkbox' %}
+                        <div class="space-y-2">
+                        {% for opcao in pergunta.opcoes.all %}
+                            <label class="flex items-center p-3 border border-gray-100 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors">
+                                <input type="checkbox" class="h-4 w-4 rounded text-emerald-600 focus:ring-emerald-500 border-gray-300"> 
+                                <span class="ml-3 text-gray-700">{{ opcao.texto }}</span>
+                            </label>
+                        {% endfor %}
+                        </div>
+
+                    {% elif pergunta.tipo == 'select' %}
+                        <select class="w-full border rounded-xl p-3 border-gray-300 focus:ring-emerald-500 focus:border-emerald-500">
+                            <option value="">Selecione uma opção...</option>
+                            {% for opcao in pergunta.opcoes.all %}
+                                <option value="{{ opcao.id }}">{{ opcao.texto }}</option>
+                            {% endfor %}
+                        </select>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <div class="bg-white border border-gray-200 rounded-2xl p-12 text-center shadow-sm">
+                <p class="text-gray-400 italic">Este formulário ainda não possui perguntas cadastradas.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if perguntas %}
+    <div class="mt-8 text-center pb-12">
+        <button type="button" onclick="alert('Isso é apenas um preview! O formulário está perfeito.')" class="bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold inline-block w-full md:w-auto shadow-md hover:bg-emerald-700 transition-colors">
+            Concluir Questionário
+        </button>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
