@@ -37,6 +37,10 @@ class Participante(models.Model):
         max_length=200
     )
 
+    sobrenome = models.CharField(
+        max_length=200
+    )
+
     email = models.EmailField()
 
     telefone = models.CharField(

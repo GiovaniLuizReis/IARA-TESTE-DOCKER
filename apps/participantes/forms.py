@@ -9,6 +9,7 @@ class ParticipanteForm(forms.ModelForm):
 
         fields = [
             'nome',
+            'sobrenome',
             'email',
             'data_nascimento',
             'sexo',
@@ -22,6 +23,12 @@ class ParticipanteForm(forms.ModelForm):
                 'class': 'w-full rounded-xl border border-gray-300 px-4 py-3',
                 'placeholder': 'Nome completo'
             }),
+
+            'sobrenome': forms.TextInput(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3',
+                'placeholder': 'Sobrenome'
+            }),
+
 
             'email': forms.EmailInput(attrs={
                 'class': 'w-full rounded-xl border border-gray-300 px-4 py-3',
