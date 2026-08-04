@@ -17,7 +17,7 @@
         {% endif %}
 
         <div class="bg-purple-50 border border-purple-100 rounded-xl p-4 text-sm text-purple-800 mb-4">
-            <strong>Regra de Condicionalidade:</strong> Se a resposta escolhida pelo paciente corresponder ao critério abaixo, o sistema saltará os elementos intermediários diretamente para a pergunta destino configurada.
+            <strong>Regra de Condicionalidade:</strong> Se a resposta escolhida pelo paciente corresponder ao critério abaixo, o sistema executará a ação configurada (pular ou finalizar).
         </div>
 
         <div>
@@ -28,7 +28,14 @@
             {% endif %}
         </div>
         
+        <!-- NOVO CAMPO: Ação a ser executada -->
         <div>
+            <label class="block mb-2 font-medium text-gray-700">Ação a ser executada:</label>
+            {{ form.acao }}
+        </div>
+        
+        <!-- ENVOLVEMOS ESTE BLOCO COM UM ID PARA O JAVASCRIPT ESCONDER/MOSTRAR -->
+        <div id="bloco_destino">
             <label class="block mb-2 font-medium text-gray-700">Pular diretamente para a pergunta:</label>
             {{ form.pergunta_destino }}
             {% if form.pergunta_destino.errors %}
@@ -50,10 +57,29 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        // Estiliza os selects
         const selects = document.querySelectorAll('select');
         selects.forEach(select => {
             select.classList.add('w-full', 'rounded-xl', 'border-gray-300', 'shadow-sm', 'focus:border-purple-500', 'focus:ring-purple-500');
         });
+
+        // Lógica para esconder/mostrar o bloco destino
+        const acaoSelect = document.getElementById('id_acao');
+        const blocoDestino = document.getElementById('bloco_destino');
+
+        function toggleDestino() {
+            if (acaoSelect && acaoSelect.value === 'finalizar') {
+                blocoDestino.style.display = 'none'; // Esconde se for finalizar
+            } else if (blocoDestino) {
+                blocoDestino.style.display = 'block'; // Mostra se for pular
+            }
+        }
+
+        // Executa ao carregar a página e toda vez que o select de ação mudar
+        if (acaoSelect) {
+            toggleDestino();
+            acaoSelect.addEventListener('change', toggleDestino);
+        }
     });
 </script>
 {% endblock %}

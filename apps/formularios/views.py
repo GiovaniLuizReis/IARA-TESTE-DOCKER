@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Formulario, Pergunta, OpcaoPergunta, RegraPulo
@@ -53,7 +54,7 @@ def gerenciar_estrutura(request, formulario_id):
 def cadastrar_pergunta(request, formulario_id):
     formulario = get_object_or_404(Formulario, id=formulario_id)
     if request.method == 'POST':
-        form = PerguntaForm(request.POST)
+        form = PerguntaForm(request.POST, request.FILES )
         if form.is_valid():
             pergunta = form.save(commit=False)
             pergunta.formulario = formulario
@@ -68,7 +69,7 @@ def cadastrar_pergunta(request, formulario_id):
 def editar_pergunta(request, pergunta_id):
     pergunta = get_object_or_404(Pergunta, id=pergunta_id)
     if request.method == 'POST':
-        form = PerguntaForm(request.POST, instance=pergunta)
+        form = PerguntaForm(request.POST, request.FILES, instance=pergunta)
         if form.is_valid():
             form.save()
             messages.success(request, 'Pergunta atualizada com sucesso.')
@@ -101,7 +102,10 @@ def cadastrar_opcao(request, pergunta_id):
             opcao.pergunta = pergunta
             opcao.save()
             messages.success(request, 'Opção adicionada com sucesso.')
-            return redirect('gerenciar_estrutura', formulario_id=pergunta.formulario.id)
+            #return redirect('gerenciar_estrutura', formulario_id=pergunta.formulario.id)
+            url_base =  reverse('gerenciar_estrutura', kwargs={'formulario_id': pergunta.formulario.id})
+            return redirect(f"{url_base}#pergunta-{pergunta.id}")
+    
     else:
         form = OpcaoForm()
     return render(request, 'cadastrar_opcao.html', {'form': form, 'pergunta': pergunta, 'active_page': 'formularios'})

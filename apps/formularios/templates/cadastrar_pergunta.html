@@ -9,7 +9,8 @@
         <p class="text-gray-500 mt-1">Criando nova pergunta diretamente para o formulário: <span class="font-semibold text-gray-700">{{ formulario.nome }}</span></p>
     </div>
 
-    <form method="POST" class="bg-white rounded-2xl shadow-sm border p-8 space-y-6">
+    <!-- ATENÇÃO: enctype="multipart/form-data" adicionado aqui para permitir o upload da imagem -->
+    <form method="POST" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-sm border p-8 space-y-6">
         {% csrf_token %}
         
         <div>
@@ -25,6 +26,16 @@
             <label class="block mb-2 font-medium text-gray-700">Subtítulo ou Instrução (Opcional)</label>
             {{ form.subtitulo }}
             <p class="text-xs text-gray-400 mt-1">Texto de apoio para ajudar o participante a entender a pergunta.</p>
+        </div>
+
+        <!-- NOVO BLOCO DE IMAGEM AQUI -->
+        <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl">
+            <label class="block mb-2 font-medium text-gray-700">Imagem Ilustrativa (Opcional)</label>
+            {{ form.imagem_ilustrativa }}
+            {% if form.imagem_ilustrativa.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.imagem_ilustrativa.errors.0 }}</p>
+            {% endif %}
+            <p class="text-xs text-gray-400 mt-2">Insira uma imagem para ilustrar a escala ou o enunciado (ex: escala de 0 a 5).</p>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -68,6 +79,19 @@
         const checkFields = document.querySelectorAll('input[type="checkbox"]');
         checkFields.forEach(field => {
             field.classList.add('rounded', 'border-gray-300', 'text-emerald-600', 'focus:ring-emerald-500', 'h-5', 'w-5');
+        });
+
+        // Injeção de classes Tailwind no input de Arquivo (Imagem)
+        const fileFields = document.querySelectorAll('input[type="file"]');
+        fileFields.forEach(field => {
+            field.classList.add(
+                'block', 'w-full', 'text-sm', 'text-gray-500',
+                'file:mr-4', 'file:py-2', 'file:px-4',
+                'file:rounded-xl', 'file:border-0',
+                'file:text-sm', 'file:font-semibold',
+                'file:bg-emerald-50', 'file:text-emerald-700',
+                'hover:file:bg-emerald-100', 'cursor-pointer'
+            );
         });
     });
 </script>

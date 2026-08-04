@@ -7,7 +7,7 @@
     <h1 class="text-3xl font-bold mb-2">Modificar Campo de Pergunta</h1>
     <p class="text-gray-500 mb-8">Ajuste os parâmetros estruturais do campo.</p>
 
-    <form method="POST" action="{% url 'editar_pergunta' pergunta.id %}" class="bg-white rounded-2xl shadow-sm border p-8 space-y-6">
+    <form method="POST" enctype="multipart/form-data" action="{% url 'editar_pergunta' pergunta.id %}" class="bg-white rounded-2xl shadow-sm border p-8 space-y-6">
         {% csrf_token %}
         
         {% if form.non_field_errors %}
@@ -29,6 +29,25 @@
             {{ form.subtitulo }}
             {% if form.subtitulo.errors %}
                 <p class="text-red-500 text-xs mt-1">{{ form.subtitulo.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- NOVO BLOCO DE IMAGEM AQUI -->
+        <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl">
+            <label class="block mb-2 font-medium text-gray-700">Imagem Ilustrativa (Opcional)</label>
+            {{ form.imagem_ilustrativa }}
+            {% if form.imagem_ilustrativa.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.imagem_ilustrativa.errors.0 }}</p>
+            {% endif %}
+            
+            <!-- Mostra a miniatura se já existir uma imagem salva -->
+            {% if pergunta.imagem_ilustrativa %}
+                <div class="mt-4 p-3 bg-white border border-gray-200 rounded-lg inline-block">
+                    <p class="text-sm text-emerald-600 font-medium mb-2">✓ Imagem atual salva:</p>
+                    <img src="{{ pergunta.imagem_ilustrativa.url }}" alt="Imagem atual" class="h-20 w-auto rounded border border-gray-100 object-cover">
+                </div>
+            {% else %}
+                <p class="text-xs text-gray-400 mt-2">Nenhuma imagem cadastrada no momento.</p>
             {% endif %}
         </div>
         
@@ -81,6 +100,19 @@
         if (checkbox) {
             checkbox.classList.add('rounded', 'border-gray-300', 'text-emerald-600', 'h-5', 'w-5');
         }
+
+        // Injeção de classes Tailwind no input de Arquivo (Imagem)
+        const fileFields = document.querySelectorAll('input[type="file"]');
+        fileFields.forEach(field => {
+            field.classList.add(
+                'block', 'w-full', 'text-sm', 'text-gray-500', 'mt-2',
+                'file:mr-4', 'file:py-2', 'file:px-4',
+                'file:rounded-xl', 'file:border-0',
+                'file:text-sm', 'file:font-semibold',
+                'file:bg-emerald-50', 'file:text-emerald-700',
+                'hover:file:bg-emerald-100', 'cursor-pointer'
+            );
+        });
     });
 </script>
 {% endblock %}

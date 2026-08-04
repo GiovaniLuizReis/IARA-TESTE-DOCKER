@@ -16,7 +16,7 @@
             <label class="block mb-2 font-medium text-gray-700">Nome do Formulário</label>
             {{ form.nome }}
             {% if form.nome.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ form.nome.errors.0 }}</p>
+                <p class="text-red-500 text-xs mt-1 border border-red-500 rounded-lg p-2">{{ form.nome.errors.0 }}</p>
             {% endif %}
         </div>
 
@@ -24,7 +24,7 @@
             <label class="block mb-2 font-medium text-gray-700">Descrição (Opcional)</label>
             {{ form.descricao }}
             {% if form.descricao.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ form.descricao.errors.0 }}</p>
+                <p class="text-red-500 text-xs mt-1 border border-red-500 rounded-lg p-2">{{ form.descricao.errors.0 }}</p>
             {% endif %}
         </div>
 
@@ -63,11 +63,38 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const textFields = document.querySelectorAll('input[type="text"], input[type="number"], textarea, select');
+        // 1. Estiliza os campos de texto, números e selects (com borda cinza visível)
+        const textFields = document.querySelectorAll('input[type="text"], input[type="number"], select');
         textFields.forEach(field => {
-            field.classList.add('w-full', 'rounded-xl', 'border-gray-300', 'shadow-sm', 'focus:border-emerald-500', 'focus:ring-emerald-500');
+            field.classList.add(
+                'w-full', 'rounded-xl', 'border', 'border-gray-400', 
+                'shadow-sm', 'focus:border-emerald-500', 'focus:ring-emerald-500'
+            );
+        });
+
+        // 2. Estiliza especificamente o Textarea (Descrição) e aplica o auto-crescimento
+        const textareas = document.querySelectorAll('textarea');
+        textareas.forEach(textarea => {
+            textarea.classList.add(
+                'w-full', 'rounded-xl', 'border', 'border-gray-400', 
+                'shadow-sm', 'focus:border-emerald-500', 'focus:ring-emerald-500',
+                'overflow-hidden', 'resize-none'
+            );
+
+            // Função para fazer o textarea crescer conforme digita
+            function autoGrow() {
+                this.style.height = 'auto'; // Reseta a altura
+                this.style.height = (this.scrollHeight) + 'px'; // Define a altura baseada no conteúdo
+            }
+
+            // Aplica a função ao digitar
+            textarea.addEventListener('input', autoGrow);
+            
+            // Aplica uma vez ao carregar a página (caso venha com texto do banco de dados)
+            autoGrow.call(textarea);
         });
         
+        // 3. Estiliza os checkboxes
         const checkFields = document.querySelectorAll('input[type="checkbox"]');
         checkFields.forEach(field => {
             field.classList.add('rounded', 'border-gray-300', 'text-emerald-600', 'focus:ring-emerald-500', 'h-5', 'w-5');

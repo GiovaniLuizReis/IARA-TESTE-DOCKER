@@ -35,6 +35,14 @@
                     <p class="text-gray-500 text-sm mt-1 mb-4">{{ pergunta.subtitulo }}</p>
                 {% endif %}
 
+                <!-- NOVO BLOCO DA IMAGEM ADICIONADO AQUI -->
+                {% if pergunta.imagem_ilustrativa %}
+                    <div class="mt-4 mb-6">
+                        <img src="{{ pergunta.imagem_ilustrativa.url }}" alt="Ilustração para {{ pergunta.titulo }}" class="max-w-full h-auto rounded-xl shadow-sm border border-gray-200 object-contain">
+                    </div>
+                {% endif %}
+                <!-- FIM DO BLOCO DA IMAGEM -->
+
                 <div class="mt-4">
                     {% if pergunta.tipo == 'texto' %}
                         <textarea class="w-full border rounded-xl p-3 border-gray-300 focus:ring-emerald-500 focus:border-emerald-500" rows="3" placeholder="Sua resposta aqui..."></textarea>
