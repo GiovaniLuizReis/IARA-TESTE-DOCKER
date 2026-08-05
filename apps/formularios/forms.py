@@ -10,7 +10,7 @@ class FormularioForm(forms.ModelForm):
 class PerguntaForm(forms.ModelForm):
     class Meta:
         model = Pergunta
-        fields = ['titulo', 'subtitulo', 'tipo', 'obrigatoria', 'ordem', 'imagem_ilustrativa']
+        fields = ['titulo','titulo_secao', 'descricao_secao', 'subtitulo', 'tipo', 'obrigatoria', 'ordem', 'imagem_ilustrativa']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,7 +23,7 @@ class PerguntaForm(forms.ModelForm):
 class OpcaoForm(forms.ModelForm):
     class Meta:
         model = OpcaoPergunta
-        fields = ['texto', 'ordem']
+        fields = ['texto','exige_texto_livre','ordem']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

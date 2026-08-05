@@ -18,10 +18,28 @@
         <strong>Modo de Visualização Prévia:</strong> O bloco abaixo simula a exibição exata e o comportamento estético que o paciente visualizará ao responder ao questionário via token.
     </div>
 
+    <!-- SE A PERGUNTA INICIAR UMA NOVA SEÇÃO -->
+    {% if pergunta.titulo_secao or pergunta.descricao_secao %}
+        <div class="pt-4 pb-4 border-b-2 border-emerald-500 mb-6 bg-white px-8 rounded-xl shadow-sm border border-gray-200">
+            <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1 block">Início de Nova Seção</span>
+            
+            {% if pergunta.titulo_secao %}
+                <h2 class="text-2xl font-bold text-gray-800">{{ pergunta.titulo_secao }}</h2>
+            {% endif %}
+            
+            {% if pergunta.descricao_secao %}
+                <p class="text-gray-600 mt-2 whitespace-pre-line">{{ pergunta.descricao_secao }}</p>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <!-- CAIXA DA PERGUNTA -->
     <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
+        
+        <!-- TÍTULO E SUBTÍTULO -->
         <div class="mb-4">
             <label class="block text-lg font-semibold text-gray-800">
-                {{ pergunta.titulo }}
+                {{ pergunta.ordem }}. {{ pergunta.titulo }}
                 {% if pergunta.obrigatoria %}
                     <span class="text-red-500 font-bold">*</span>
                 {% endif %}
@@ -31,22 +49,48 @@
             {% endif %}
         </div>
 
+        <!-- IMAGEM ILUSTRATIVA -->
+        {% if pergunta.imagem_ilustrativa %}
+            <div class="mt-4 mb-6">
+                <img src="{{ pergunta.imagem_ilustrativa.url }}" alt="Ilustração para {{ pergunta.titulo }}" class="max-w-full h-auto rounded-xl shadow-sm border border-gray-200 object-contain">
+            </div>
+        {% endif %}
+
+        <!-- CAMPOS DE RESPOSTA -->
         <div class="mt-6">
             {% if pergunta.tipo == 'texto' %}
-                <textarea rows="4" placeholder="Área de digitação de texto..." class="w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"></textarea>
+                <textarea rows="4" placeholder="Área de digitação de texto..." class="w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-3 bg-gray-50 outline-none"></textarea>
 
             {% elif pergunta.tipo == 'numero' %}
-                <input type="number" placeholder="0" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                <input type="number" placeholder="0" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-3 bg-gray-50 outline-none">
 
             {% elif pergunta.tipo == 'data' %}
-                <input type="date" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                <input type="date" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-3 bg-gray-50 outline-none">
+            
+            {% elif pergunta.tipo == 'duracao' %}
+                <div class="flex items-center gap-4">
+                    <div class="flex flex-col">
+                        <label class="text-xs font-semibold text-gray-500 mb-1">Horas</label>
+                        <input type="number" min="0" placeholder="00" class="w-24 rounded-xl border border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-3 bg-gray-50 outline-none text-center">
+                    </div>
+                    <span class="text-2xl font-bold text-gray-400 mt-4">:</span>
+                    <div class="flex flex-col">
+                        <label class="text-xs font-semibold text-gray-500 mb-1">Minutos</label>
+                        <input type="number" min="0" max="59" placeholder="00" class="w-24 rounded-xl border border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-3 bg-gray-50 outline-none text-center">
+                    </div>
+                </div>
 
             {% elif pergunta.tipo == 'radio' %}
                 <div class="space-y-3">
                     {% for opcao in pergunta.opcoes.all %}
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="radio" name="preview_radio" value="{{ opcao.id }}" class="h-5 w-5 text-emerald-600 border-gray-300 focus:ring-emerald-500">
-                            <span class="text-gray-700">{{ opcao.texto }}</span>
+                        <label class="flex items-start gap-3 cursor-pointer p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors w-full">
+                            <input type="radio" name="preview_radio" value="{{ opcao.id }}" class="flex-shrink-0 mt-0.5 h-5 w-5 text-emerald-600 border-gray-300 focus:ring-emerald-500">
+                            <div class="flex flex-col w-full">
+                                <span class="text-gray-700 leading-snug">{{ opcao.texto }}</span>
+                                {% if opcao.exige_texto_livre %}
+                                    <input type="text" placeholder="Especifique aqui..." class="mt-2 w-full border-0 border-b border-gray-300 bg-transparent focus:border-emerald-500 focus:ring-0 px-0 py-1 text-sm text-gray-700" onclick="event.stopPropagation()">
+                                {% endif %}
+                            </div>
                         </label>
                     {% empty %}
                         <p class="text-xs text-red-500 italic">Cadastre opções para este campo para visualizar a lista.</p>
@@ -56,9 +100,14 @@
             {% elif pergunta.tipo == 'checkbox' %}
                 <div class="space-y-3">
                     {% for opcao in pergunta.opcoes.all %}
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" name="preview_check" value="{{ opcao.id }}" class="h-5 w-5 rounded text-emerald-600 border-gray-300 focus:ring-emerald-500">
-                            <span class="text-gray-700">{{ opcao.texto }}</span>
+                        <label class="flex items-start gap-3 cursor-pointer p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors w-full">
+                            <input type="checkbox" name="preview_check" value="{{ opcao.id }}" class="flex-shrink-0 mt-0.5 h-5 w-5 rounded text-emerald-600 border-gray-300 focus:ring-emerald-500">
+                            <div class="flex flex-col w-full">
+                                <span class="text-gray-700 leading-snug">{{ opcao.texto }}</span>
+                                {% if opcao.exige_texto_livre %}
+                                    <input type="text" placeholder="Especifique aqui..." class="mt-2 w-full border-0 border-b border-gray-300 bg-transparent focus:border-emerald-500 focus:ring-0 px-0 py-1 text-sm text-gray-700" onclick="event.stopPropagation()">
+                                {% endif %}
+                            </div>
                         </label>
                     {% empty %}
                         <p class="text-xs text-red-500 italic">Cadastre opções para este campo para visualizar a lista.</p>
@@ -66,7 +115,7 @@
                 </div>
 
             {% elif pergunta.tipo == 'select' %}
-                <select class="w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                <select class="w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-3 bg-white outline-none">
                     <option value="">Selecione uma opção...</option>
                     {% for opcao in pergunta.opcoes.all %}
                         <option value="{{ opcao.id }}">{{ opcao.texto }}</option>
@@ -134,7 +183,7 @@
                 <div class="space-y-2">
                     {% for opcao in pergunta.opcoes.all %}
                         <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border">
-                            <input type="number" min="1" max="10" placeholder="Posição" class="w-20 rounded-lg border-gray-300 text-center focus:border-emerald-500 focus:ring-emerald-500">
+                            <input type="number" min="1" max="10" placeholder="Posição" class="w-20 rounded-lg border-gray-300 text-center focus:border-emerald-500 focus:ring-emerald-500 bg-white">
                             <span class="text-gray-700 font-medium">{{ opcao.texto }}</span>
                         </div>
                     {% empty %}

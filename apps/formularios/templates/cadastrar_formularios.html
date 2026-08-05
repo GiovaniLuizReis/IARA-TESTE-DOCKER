@@ -13,7 +13,7 @@
         {% csrf_token %}
 
         <div>
-            <label class="block mb-2 font-medium text-gray-700">Nome do Formulário</label>
+            <label class="block mb-2 text-sm font-semibold text-gray-700">Nome do Formulário</label>
             {{ form.nome }}
             {% if form.nome.errors %}
                 <p class="text-red-500 text-xs mt-1 border border-red-500 rounded-lg p-2">{{ form.nome.errors.0 }}</p>
@@ -21,7 +21,7 @@
         </div>
 
         <div>
-            <label class="block mb-2 font-medium text-gray-700">Descrição (Opcional)</label>
+            <label class="block mb-2 text-sm font-semibold text-gray-700">Descrição (Opcional)</label>
             {{ form.descricao }}
             {% if form.descricao.errors %}
                 <p class="text-red-500 text-xs mt-1 border border-red-500 rounded-lg p-2">{{ form.descricao.errors.0 }}</p>
@@ -30,23 +30,23 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-                <label class="block mb-2 font-medium text-gray-700">Fase / Parte</label>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">Fase / Parte</label>
                 {{ form.parte }}
             </div>
             <div>
-                <label class="block mb-2 font-medium text-gray-700">Tempo Estimado (Minutos)</label>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">Tempo Estimado (Minutos)</label>
                 {{ form.tempo_estimado }}
             </div>
             <div>
-                <label class="block mb-2 font-medium text-gray-700">Ordem de Exibição</label>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">Ordem de Exibição</label>
                 {{ form.ordem }}
             </div>
         </div>
 
         <div class="flex flex-col gap-4 mt-6 p-5 bg-gray-50 border border-gray-200 rounded-xl">
-            <label class="flex items-center gap-3 cursor-pointer">
+            <label class="flex items-center gap-3 cursor-pointer text-sm font-semibold text-gray-700">
                 {{ form.ativo }}
-                <span class="font-medium text-gray-700">Formulário Ativo para Coleta</span>
+                <span>Formulário Ativo para Coleta</span>
             </label>
         </div>
 
@@ -63,12 +63,13 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // 1. Estiliza os campos de texto, números e selects (com borda cinza visível)
+        // 1. Estiliza os campos de texto, números e selects (Idêntico ao Cadastro de Usuário)
         const textFields = document.querySelectorAll('input[type="text"], input[type="number"], select');
         textFields.forEach(field => {
             field.classList.add(
-                'w-full', 'rounded-xl', 'border', 'border-gray-400', 
-                'shadow-sm', 'focus:border-emerald-500', 'focus:ring-emerald-500'
+                'w-full', 'rounded-xl', 'border', 'border-gray-300', 
+                'shadow-sm', 'focus:border-emerald-500', 'focus:ring-emerald-500',
+                'p-3', 'bg-gray-50', 'outline-none' // <-- p-3 adicionado aqui para resolver a margem!
             );
         });
 
@@ -76,21 +77,22 @@
         const textareas = document.querySelectorAll('textarea');
         textareas.forEach(textarea => {
             textarea.classList.add(
-                'w-full', 'rounded-xl', 'border', 'border-gray-400', 
+                'w-full', 'rounded-xl', 'border', 'border-gray-300', 
                 'shadow-sm', 'focus:border-emerald-500', 'focus:ring-emerald-500',
+                'p-3', 'bg-gray-50', 'outline-none', // <-- p-3 adicionado aqui também!
                 'overflow-hidden', 'resize-none'
             );
 
             // Função para fazer o textarea crescer conforme digita
             function autoGrow() {
-                this.style.height = 'auto'; // Reseta a altura
-                this.style.height = (this.scrollHeight) + 'px'; // Define a altura baseada no conteúdo
+                this.style.height = 'auto'; 
+                this.style.height = (this.scrollHeight) + 'px'; 
             }
 
             // Aplica a função ao digitar
             textarea.addEventListener('input', autoGrow);
             
-            // Aplica uma vez ao carregar a página (caso venha com texto do banco de dados)
+            // Aplica uma vez ao carregar a página
             autoGrow.call(textarea);
         });
         

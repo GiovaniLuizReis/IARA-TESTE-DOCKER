@@ -9,12 +9,32 @@
         <p class="text-gray-500 mt-1">Criando nova pergunta diretamente para o formulário: <span class="font-semibold text-gray-700">{{ formulario.nome }}</span></p>
     </div>
 
-    <!-- ATENÇÃO: enctype="multipart/form-data" adicionado aqui para permitir o upload da imagem -->
     <form method="POST" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-sm border p-8 space-y-6">
         {% csrf_token %}
         
+        <!-- BLOCO OPCIONAL: NOVA SEÇÃO -->
+        <div class="p-5 bg-blue-50 border border-blue-200 rounded-xl mb-6">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined text-blue-600">view_agenda</span>
+                <h3 class="text-lg font-bold text-blue-900">Iniciar Nova Seção (Opcional)</h3>
+            </div>
+            <p class="text-sm text-blue-700 mb-4">Preencha estes campos apenas se esta pergunta for a primeira de um novo bloco (Ex: "Questões Étnico-Raciais").</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block mb-2 text-sm font-semibold text-blue-900">Título da Seção</label>
+                    {{ form.titulo_secao }}
+                </div>
+                <div>
+                    <label class="block mb-2 text-sm font-semibold text-blue-900">Descrição da Seção (Opcional)</label>
+                    {{ form.descricao_secao }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- CAMPOS DA PERGUNTA EM SI -->
         <div>
-            <label class="block mb-2 font-medium text-gray-700">Título da Pergunta</label>
+            <label class="block mb-2 text-sm font-semibold text-gray-700">Título da Pergunta</label>
             {{ form.titulo }}
             {% if form.titulo.errors %}
                 <p class="text-red-500 text-xs mt-1">{{ form.titulo.errors.0 }}</p>
@@ -23,14 +43,13 @@
         </div>
 
         <div>
-            <label class="block mb-2 font-medium text-gray-700">Subtítulo ou Instrução (Opcional)</label>
+            <label class="block mb-2 text-sm font-semibold text-gray-700">Subtítulo ou Instrução (Opcional)</label>
             {{ form.subtitulo }}
             <p class="text-xs text-gray-400 mt-1">Texto de apoio para ajudar o participante a entender a pergunta.</p>
         </div>
 
-        <!-- NOVO BLOCO DE IMAGEM AQUI -->
-        <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl">
-            <label class="block mb-2 font-medium text-gray-700">Imagem Ilustrativa (Opcional)</label>
+        <div class="p-5 bg-gray-50 border border-gray-200 rounded-xl">
+            <label class="block mb-2 text-sm font-semibold text-gray-700">Imagem Ilustrativa (Opcional)</label>
             {{ form.imagem_ilustrativa }}
             {% if form.imagem_ilustrativa.errors %}
                 <p class="text-red-500 text-xs mt-1">{{ form.imagem_ilustrativa.errors.0 }}</p>
@@ -40,19 +59,19 @@
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label class="block mb-2 font-medium text-gray-700">Tipo de Resposta</label>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">Tipo de Resposta</label>
                 {{ form.tipo }}
             </div>
             <div>
-                <label class="block mb-2 font-medium text-gray-700">Ordem de Exibição</label>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">Ordem de Exibição</label>
                 {{ form.ordem }}
             </div>
         </div>
 
-        <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl mt-4">
-            <label class="flex items-center gap-3 cursor-pointer">
+        <div class="p-5 bg-gray-50 border border-gray-200 rounded-xl mt-4">
+            <label class="flex items-center gap-3 cursor-pointer text-sm font-semibold text-gray-700">
                 {{ form.obrigatoria }}
-                <span class="font-medium text-gray-700">Pergunta Obrigatória</span>
+                <span>Pergunta Obrigatória</span>
             </label>
         </div>
         
@@ -70,10 +89,14 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Injeção de classes Tailwind nos inputs do Django
+        // Estiliza os campos de texto, números e selects
         const textFields = document.querySelectorAll('input[type="text"], input[type="number"], textarea, select');
         textFields.forEach(field => {
-            field.classList.add('w-full', 'rounded-xl', 'border-gray-300', 'shadow-sm', 'focus:border-emerald-500', 'focus:ring-emerald-500');
+            field.classList.add(
+                'w-full', 'rounded-xl', 'border', 'border-gray-300', 
+                'shadow-sm', 'focus:border-emerald-500', 'focus:ring-emerald-500',
+                'p-3', 'bg-white', 'outline-none'
+            );
         });
         
         const checkFields = document.querySelectorAll('input[type="checkbox"]');
@@ -81,7 +104,7 @@
             field.classList.add('rounded', 'border-gray-300', 'text-emerald-600', 'focus:ring-emerald-500', 'h-5', 'w-5');
         });
 
-        // Injeção de classes Tailwind no input de Arquivo (Imagem)
+        // Estiliza o input de Arquivo (Imagem)
         const fileFields = document.querySelectorAll('input[type="file"]');
         fileFields.forEach(field => {
             field.classList.add(

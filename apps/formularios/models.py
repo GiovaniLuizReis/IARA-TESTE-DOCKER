@@ -34,6 +34,8 @@ class Pergunta(models.Model):
     )
     
     formulario = models.ForeignKey(Formulario, on_delete=models.CASCADE, related_name='perguntas')
+    titulo_secao = models.CharField(max_length=200, blank=True, null=True, help_text="Preencha apenas se esta pergunta iniciar uma nova seção/bloco.")
+    descricao_secao = models.TextField(blank=True, null=True, help_text="Texto explicativo opcional para a seção.")
     titulo = models.CharField(max_length=500)
     subtitulo = models.CharField(max_length=500, blank=True, null=True)
 
@@ -62,6 +64,10 @@ class Pergunta(models.Model):
 class OpcaoPergunta(models.Model):
     pergunta = models.ForeignKey(Pergunta, on_delete=models.CASCADE, related_name='opcoes')
     texto = models.CharField(max_length=200)
+    exige_texto_livre = models.BooleanField(
+        default=False, 
+        help_text="Se marcado, exibirá uma caixa de texto ao lado da opção (Ex: 'Outro (Qual?)')"
+    )
     ordem = models.IntegerField(default=1)
 
     class Meta:

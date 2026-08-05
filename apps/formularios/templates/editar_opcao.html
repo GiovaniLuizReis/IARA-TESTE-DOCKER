@@ -4,32 +4,66 @@
 
 {% block content %}
 <div class="max-w-3xl mx-auto">
-    <h1 class="text-3xl font-bold mb-2">Modificar Opção</h1>
+    <h1 class="text-3xl font-bold mb-2 text-gray-800">Modificar Opção</h1>
     <p class="text-gray-500 mb-8">Editando rótulo da alternativa de escolha.</p>
 
     <form method="POST" class="bg-white rounded-2xl shadow-sm border p-8 space-y-6">
         {% csrf_token %}
+        
+        <!-- TEXTO DA OPÇÃO -->
         <div>
-            <label class="block mb-2 font-medium text-gray-700">Texto da Opção</label>
+            <label class="block mb-2 text-sm font-semibold text-gray-700">Texto da Opção</label>
             {{ form.texto }}
+            {% if form.texto.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.texto.errors.0 }}</p>
+            {% endif %}
         </div>
+        
+        <!-- OPÇÃO "OUTRO" (TEXTO LIVRE) -->
+        <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+            <label class="flex items-center gap-3 cursor-pointer text-sm font-semibold text-blue-900">
+                {{ form.exige_texto_livre }}
+                <span>Esta opção exige digitação (Ex: Mostrar campo para especificar)</span>
+            </label>
+        </div>
+        
+        <!-- ORDEM -->
         <div>
-            <label class="block mb-2 font-medium text-gray-700">Ordem</label>
+            <label class="block mb-2 text-sm font-semibold text-gray-700">Ordem de Exibição</label>
             {{ form.ordem }}
+            {% if form.ordem.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.ordem.errors.0 }}</p>
+            {% endif %}
         </div>
-        <div class="mt-8 flex gap-3 pt-4 border-t">
-            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-medium shadow-sm">
+        
+        <div class="mt-8 flex gap-3 pt-6 border-t border-gray-100">
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-medium shadow-sm transition-colors">
                 Atualizar Opção
             </button>
-            <a href="{% url 'gerenciar_estrutura' opcao.pergunta.formulario.id %}" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-3 rounded-xl font-medium">
+            <a href="{% url 'gerenciar_estrutura' opcao.pergunta.formulario.id %}" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-3 rounded-xl font-medium transition-colors">
                 Cancelar
             </a>
         </div>
     </form>
 </div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        document.querySelectorAll('input[type="text"], input[type="number"]').forEach(f => f.classList.add('w-full', 'rounded-xl', 'border-gray-300', 'shadow-sm', 'focus:border-emerald-500', 'focus:ring-emerald-500'));
+        // Estiliza campos de texto e números
+        const textFields = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
+        textFields.forEach(field => {
+            field.classList.add(
+                'w-full', 'rounded-xl', 'border', 'border-gray-300', 
+                'shadow-sm', 'focus:border-emerald-500', 'focus:ring-emerald-500',
+                'p-3', 'bg-gray-50', 'outline-none'
+            );
+        });
+
+        // Estiliza checkboxes
+        const checkFields = document.querySelectorAll('input[type="checkbox"]');
+        checkFields.forEach(field => {
+            field.classList.add('rounded', 'border-blue-300', 'text-blue-600', 'focus:ring-blue-500', 'h-5', 'w-5');
+        });
     });
 </script>
 {% endblock %}

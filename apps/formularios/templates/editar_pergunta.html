@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="max-w-3xl mx-auto">
-    <h1 class="text-3xl font-bold mb-2">Modificar Campo de Pergunta</h1>
+    <h1 class="text-3xl font-bold mb-2 text-gray-800">Modificar Campo de Pergunta</h1>
     <p class="text-gray-500 mb-8">Ajuste os parâmetros estruturais do campo.</p>
 
     <form method="POST" enctype="multipart/form-data" action="{% url 'editar_pergunta' pergunta.id %}" class="bg-white rounded-2xl shadow-sm border p-8 space-y-6">
@@ -16,8 +16,28 @@
             </div>
         {% endif %}
 
+        <!-- BLOCO OPCIONAL: NOVA SEÇÃO PADRONIZADO -->
+        <div class="p-5 bg-blue-50 border border-blue-200 rounded-xl mb-6">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined text-blue-600">view_agenda</span>
+                <h3 class="text-lg font-bold text-blue-900">Iniciar Nova Seção (Opcional)</h3>
+            </div>
+            <p class="text-sm text-blue-700 mb-4">Preencha estes campos apenas se esta pergunta for a primeira de um novo bloco (Ex: "Questões Étnico-Raciais").</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block mb-2 text-sm font-semibold text-blue-900">Título da Seção</label>
+                    {{ form.titulo_secao }}
+                </div>
+                <div>
+                    <label class="block mb-2 text-sm font-semibold text-blue-900">Descrição da Seção (Opcional)</label>
+                    {{ form.descricao_secao }}
+                </div>
+            </div>
+        </div>
+
         <div>
-            <label class="block mb-2 font-medium text-gray-700">Título / Pergunta</label>
+            <label class="block mb-2 text-sm font-semibold text-gray-700">Título / Pergunta</label>
             {{ form.titulo }}
             {% if form.titulo.errors %}
                 <p class="text-red-500 text-xs mt-1">{{ form.titulo.errors.0 }}</p>
@@ -25,22 +45,20 @@
         </div>
         
         <div>
-            <label class="block mb-2 font-medium text-gray-700">Subtítulo (Opcional)</label>
+            <label class="block mb-2 text-sm font-semibold text-gray-700">Subtítulo (Opcional)</label>
             {{ form.subtitulo }}
             {% if form.subtitulo.errors %}
                 <p class="text-red-500 text-xs mt-1">{{ form.subtitulo.errors.0 }}</p>
             {% endif %}
         </div>
 
-        <!-- NOVO BLOCO DE IMAGEM AQUI -->
-        <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl">
-            <label class="block mb-2 font-medium text-gray-700">Imagem Ilustrativa (Opcional)</label>
+        <div class="p-5 bg-gray-50 border border-gray-200 rounded-xl">
+            <label class="block mb-2 text-sm font-semibold text-gray-700">Imagem Ilustrativa (Opcional)</label>
             {{ form.imagem_ilustrativa }}
             {% if form.imagem_ilustrativa.errors %}
                 <p class="text-red-500 text-xs mt-1">{{ form.imagem_ilustrativa.errors.0 }}</p>
             {% endif %}
             
-            <!-- Mostra a miniatura se já existir uma imagem salva -->
             {% if pergunta.imagem_ilustrativa %}
                 <div class="mt-4 p-3 bg-white border border-gray-200 rounded-lg inline-block">
                     <p class="text-sm text-emerald-600 font-medium mb-2">✓ Imagem atual salva:</p>
@@ -51,9 +69,9 @@
             {% endif %}
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label class="block mb-2 font-medium text-gray-700">Tipo de Resposta</label>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">Tipo de Resposta</label>
                 {{ form.tipo }}
                 {% if form.tipo.errors %}
                     <p class="text-red-500 text-xs mt-1">{{ form.tipo.errors.0 }}</p>
@@ -61,29 +79,29 @@
             </div>
             
             <div>
-                <label class="block mb-2 font-medium text-gray-700">Ordem</label>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">Ordem</label>
                 {{ form.ordem }}
                 {% if form.ordem.errors %}
                     <p class="text-red-500 text-xs mt-1">{{ form.ordem.errors.0 }}</p>
                 {% endif %}
             </div>
-            
-            <div class="flex items-center pt-8">
-                <label class="flex items-center gap-3 cursor-pointer">
-                    {{ form.obrigatoria }}
-                    <span class="font-medium text-gray-700">Obrigatória</span>
-                </label>
-                {% if form.obrigatoria.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ form.obrigatoria.errors.0 }}</p>
-                {% endif %}
-            </div>
+        </div>
+
+        <div class="p-5 bg-gray-50 border border-gray-200 rounded-xl mt-4">
+            <label class="flex items-center gap-3 cursor-pointer text-sm font-semibold text-gray-700">
+                {{ form.obrigatoria }}
+                <span>Pergunta Obrigatória</span>
+            </label>
+            {% if form.obrigatoria.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.obrigatoria.errors.0 }}</p>
+            {% endif %}
         </div>
         
-        <div class="mt-8 flex gap-3 pt-4 border-t">
-            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-medium shadow-sm">
+        <div class="mt-8 flex gap-3 pt-6 border-t border-gray-100">
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-medium shadow-sm transition-colors">
                 Salvar Alterações
             </button>
-            <a href="{% url 'gerenciar_estrutura' pergunta.formulario.id %}" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-3 rounded-xl font-medium">
+            <a href="{% url 'gerenciar_estrutura' pergunta.formulario.id %}" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-3 rounded-xl font-medium transition-colors">
                 Cancelar
             </a>
         </div>
@@ -93,15 +111,18 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         document.querySelectorAll('input[type="text"], input[type="number"], textarea, select').forEach(f => {
-            f.classList.add('w-full', 'rounded-xl', 'border-gray-300', 'shadow-sm', 'focus:border-emerald-500', 'focus:ring-emerald-500')
+            f.classList.add(
+                'w-full', 'rounded-xl', 'border', 'border-gray-300', 
+                'shadow-sm', 'focus:border-emerald-500', 'focus:ring-emerald-500',
+                'p-3', 'bg-white', 'outline-none'
+            );
         });
         
         const checkbox = document.querySelector('input[type="checkbox"]');
         if (checkbox) {
-            checkbox.classList.add('rounded', 'border-gray-300', 'text-emerald-600', 'h-5', 'w-5');
+            checkbox.classList.add('rounded', 'border-gray-300', 'text-emerald-600', 'focus:ring-emerald-500', 'h-5', 'w-5');
         }
 
-        // Injeção de classes Tailwind no input de Arquivo (Imagem)
         const fileFields = document.querySelectorAll('input[type="file"]');
         fileFields.forEach(field => {
             field.classList.add(
