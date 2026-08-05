@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}Novo Usuário{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-8">
+        <a href="{% url 'listar_usuarios' %}" class="text-sm text-emerald-600 hover:underline">← Voltar para equipe</a>
+        <h1 class="text-3xl font-bold text-gray-800 mt-2">Adicionar Novo Usuário</h1>
+        <p class="text-gray-500">Cadastre um novo membro. A matrícula/identificação será gerada automaticamente.</p>
+    </div>
+
+    <form method="POST" class="bg-white rounded-2xl shadow-sm border p-8">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <div class="p-4 mb-6 bg-red-50 text-red-600 rounded-xl text-sm font-medium border border-red-100">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <!-- Container Grid para o formulário (Duas colunas em telas grandes) -->
+        <div class="form-container grid grid-cols-1 md:grid-cols-2 gap-6">
+            {{ form.as_p }}
+        </div>
+
+        <div class="mt-10 pt-6 border-t flex gap-3">
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-medium shadow-sm transition-colors flex items-center gap-2">
+                <span class="material-symbols-outlined text-[20px]">save</span>
+                Registrar Usuário
+            </button>
+            <a href="{% url 'listar_usuarios' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-medium transition-colors">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- SCRIPT DE ESTILO, FILTRO DINÂMICO E MÁSCARAS -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        
+       
+        // 1. SCRIPT DE ESTILO TAILWIND
+        
+        const container = document.querySelector('.form-container');
+        
+        container.querySelectorAll('p').forEach(p => p.classList.add('flex', 'flex-col', 'gap-1.5'));
+        container.querySelectorAll('label').forEach(label => label.classList.add('text-sm', 'font-semibold', 'text-gray-700'));
+        
+        const fields = container.querySelectorAll('input, select');
+        fields.forEach(field => {
+            if(field.type !== 'checkbox' && field.type !== 'radio') {
+                field.classList.add('w-full', 'rounded-xl', 'border','border-solid','border-gray-300', 'shadow-sm', 'focus:border-emerald-500', 'focus:ring-emerald-500', 'p-3', 'bg-gray-50', 'outline-none');
+            }
+        });
+
+        container.querySelectorAll('.helptext').forEach(help => help.classList.add('text-xs', 'text-gray-400', 'mt-1'));
+        container.querySelectorAll('.errorlist').forEach(err => err.classList.add('text-xs', 'text-red-500', 'font-medium', 'm-0', 'p-0', 'list-none'));
+
+        
+        // 2. SCRIPT DE FILTRO DE CENTROS
+       
+        const estadoSelect = document.getElementById("id_estado_filtro");
+        const centroSelect = document.getElementById("id_centro");
+        
+        if (estadoSelect && centroSelect) {
+            const todasOpcoesCentros = Array.from(centroSelect.options);
+
+            function atualizarCentros() {
+                const estadoNome = estadoSelect.options[estadoSelect.selectedIndex].text;
+                centroSelect.innerHTML = "";
+                
+                if (estadoSelect.value === "") {
+                    centroSelect.add(new Option("Escolha um estado primeiro...", ""));
+                    return;
+                }
+
+                let encontrou = false;
+                todasOpcoesCentros.forEach(opt => {
+                    if (opt.text.startsWith(estadoNome)) {
+                        centroSelect.add(opt);
+                        encontrou = true;
+                    }
+                });
+
+                if (!encontrou) {
+                    centroSelect.add(new Option("Nenhuma unidade encontrada neste estado.", ""));
+                }
+            }
+
+            estadoSelect.addEventListener("change", atualizarCentros);
+            atualizarCentros(); 
+        }
+
+      
+        // 3. MÁSCARAS DE CPF E TELEFONE
+        
+        const cpfInput = document.getElementById('id_cpf');
+        const telefoneInput = document.getElementById('id_telefone');
+
+
+        console.log(cpfInput);
+        console.log(telefoneInput);
+
+
+        if (cpfInput) {
+            cpfInput.setAttribute('maxlength', '14');
+            cpfInput.addEventListener('input', function(e) {
+                let v = e.target.value.replace(/\D/g, ""); // Remove tudo que não é número
+                v = v.substring(0, 11); // Limita a 11 números
+                
+                if (v.length <= 3) {
+                    e.target.value = v;
+                } else if (v.length <= 6) {
+                    e.target.value = v.substring(0, 3) + "." + v.substring(3);
+                } else if (v.length <= 9) {
+                    e.target.value = v.substring(0, 3) + "." + v.substring(3, 6) + "." + v.substring(6);
+                } else {
+                    e.target.value = v.substring(0, 3) + "." + v.substring(3, 6) + "." + v.substring(6, 9) + "-" + v.substring(9);
+                }
+            });
+        }
+
+        if (telefoneInput) {
+            telefoneInput.setAttribute('maxlength', '15');
+            telefoneInput.addEventListener('input', function(e) {
+                let v = e.target.value.replace(/\D/g, ""); 
+                v = v.substring(0, 11); 
+                
+                if (v.length === 0) {
+                    e.target.value = "";
+                } else if (v.length <= 2) {
+                    e.target.value = "(" + v;
+                } else if (v.length <= 6) {
+                    e.target.value = "(" + v.substring(0, 2) + ") " + v.substring(2);
+                } else if (v.length <= 10) {
+                    // Formato fixo: (99) 9999-9999
+                    e.target.value = "(" + v.substring(0, 2) + ") " + v.substring(2, 6) + "-" + v.substring(6);
+                } else {
+                    // Formato celular: (99) 99999-9999
+                    e.target.value = "(" + v.substring(0, 2) + ") " + v.substring(2, 7) + "-" + v.substring(7);
+                }
+            });
+        }
+
+    });
+</script>
+{% endblock %}

@@ -1,102 +1,134 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="pt-br">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Usuários</title>
+{% block title %}Equipe e Acessos{% endblock %}
 
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-
-<body class="bg-gray-100">
-
-    <div class="max-w-7xl mx-auto p-8">
-
-        <div class="flex justify-between items-center mb-8">
-
-            <h1 class="text-3xl font-bold">
-                Usuários do Sistema
-            </h1>
-
-            <a href="{% url 'dashboard' %}"
-               class="bg-blue-900 text-white px-4 py-2 rounded">
-                Voltar
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- CABEÇALHO -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Equipe e Acessos</h1>
+            <p class="text-gray-500 mt-1">Gerencie os pesquisadores, atendentes e administradores do sistema.</p>
+        </div>
+        
+        <div class="flex gap-3">
+            <!-- SÓ APARECE PARA ADM -->
+            {% if user.is_superuser or user.tipo_usuario == 'ADM' %}
+            <a href="{% url 'registrar_usuario' %}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-medium shadow-sm transition-colors flex items-center gap-2">
+                <span class="material-symbols-outlined text-[20px]">person_add</span>
+                Novo Usuário
             </a>
-
+            {% endif %}
         </div>
-
-        <div class="bg-white rounded-xl shadow overflow-hidden">
-
-            <table class="w-full">
-
-                <thead class="bg-blue-900 text-white">
-
-                    <tr>
-                        <th class="p-4 text-left">Identificação</th>
-                        <th class="p-4 text-left">Nome</th>
-                        <th class="p-4 text-left">Email</th>
-                        <th class="p-4 text-left">Tipo</th>
-                        <th class="p-4 text-left">Estado</th>
-                        <th class="p-4 text-left">Centro</th>
-                        <th class="p-4 text-center">Ações</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {% for usuario in usuarios %}
-
-                    <tr class="border-b hover:bg-gray-50">
-
-                        <td class="p-4">
-                            {{ usuario.identificacao }}
-                        </td>
-
-                        <td class="p-4">
-                            {{ usuario.first_name }}
-                            {{ usuario.last_name }}
-                        </td>
-
-                        <td class="p-4">
-                            {{ usuario.email }}
-                        </td>
-
-                        <td class="p-4">
-                            {{ usuario.get_tipo_usuario_display }}
-                        </td>
-
-                        <td class="p-4">
-                            {{ usuario.estado }}
-                        </td>
-
-                        <td class="p-4">
-                            {{ usuario.centro }}
-                        </td>
-
-                        <td class="p-4 text-center">
-
-                            {% if user.is_superuser %}
-                            <a href="{% url 'editar_usuario' usuario.id %}"
-                               class="bg-green-600 text-white px-3 py-2 rounded">
-                                Editar
-                            </a>
-                            {% endif %}
-
-                        </td>
-
-                    </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
     </div>
 
-</body>
-</html>
+    {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for message in messages %}
+                <div class="p-4 {% if message.tags == 'error' %}bg-red-50 text-red-700 border-red-200{% else %}bg-green-50 text-green-700 border-green-200{% endif %} border rounded-xl text-sm shadow-sm font-medium">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- TABELA -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full whitespace-nowrap">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="text-left px-6 py-4 text-gray-500 font-semibold text-sm">Usuário</th>
+                        <th class="text-left px-6 py-4 text-gray-500 font-semibold text-sm">Identificação</th>
+                        <th class="text-left px-6 py-4 text-gray-500 font-semibold text-sm">Perfil</th>
+                        <th class="text-left px-6 py-4 text-gray-500 font-semibold text-sm">Local</th>
+                        <th class="text-right px-6 py-4 text-gray-500 font-semibold text-sm">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for membro in usuarios %}
+                    <tr class="hover:bg-gray-50 transition-colors {% if not membro.is_active %}opacity-50{% endif %}">
+                        <!-- NOME E EMAIL COM AVATAR -->
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="h-10 w-10 rounded-full {% if membro.is_active %}bg-brand-blue{% else %}bg-gray-400{% endif %} text-white flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0">
+                                    {{ membro.first_name|first|upper }}{{ membro.last_name|first|upper }}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900">
+                                        {{ membro.first_name }} {{ membro.last_name }}
+                                        {% if not membro.is_active %}
+                                            <span class="ml-2 text-xs font-bold text-red-600">(Desativado)</span>
+                                        {% endif %}
+                                    </p>
+                                    <p class="text-xs text-gray-500">{{ membro.email }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        
+                        <!-- ID -->
+                        <td class="px-6 py-4 font-mono text-sm text-gray-600 font-medium">
+                            {{ membro.identificacao|default:"Pendente" }}
+                        </td>
+                        
+                        <!-- PERFIL/TIPO -->
+                        <td class="px-6 py-4">
+                            {% if membro.tipo_usuario == 'ADM' %}
+                                <span class="bg-purple-50 text-purple-700 px-3 py-1 rounded-lg text-xs font-bold border border-purple-100">Administrador</span>
+                            {% elif membro.tipo_usuario == 'PES' %}
+                                <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold border border-blue-100">Pesquisador</span>
+                            {% else %}
+                                <span class="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg text-xs font-bold border border-emerald-100">Atendimento</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- LOCAL (Ajustado para o novo modelo de CentroInvestigacao) -->
+                        <td class="px-6 py-4 text-sm text-gray-600">
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[16px] text-gray-400">location_on</span>
+                                {% if membro.centro %}
+                                    {{ membro.centro.estado }} (C{{ membro.centro.numero|stringformat:"02d" }})
+                                {% else %}
+                                    Sede
+                                {% endif %}
+                            </div>
+                        </td>
+                        
+                        <!-- AÇÕES -->
+                        <td class="px-6 py-4 text-right">
+                            <!-- Permite que Superusuário E Administrador vejam as ações iniciais -->
+                            {% if user.is_superuser or user.tipo_usuario == 'ADM' %}
+                                <div class="flex items-center justify-end gap-3">
+                                    
+                                    <!-- Botão Editar: Aparece para TI e ADM (O ADM desativa o usuário por aqui) -->
+                                    <a href="{% url 'editar_usuario' membro.id %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-100">
+                                        Editar
+                                    </a>
+                                    
+                                    <!-- Botão Excluir: BLOQUEADO PARA ADM, liberado APENAS para o TI -->
+                                    {% if user.is_superuser %}
+                                    <form method="POST" action="{% url 'excluir_usuario' membro.id %}" class="inline m-0 p-0" onsubmit="return confirm('ATENÇÃO: Tem certeza que deseja remover permanentemente o acesso de {{ membro.first_name }}? Esta ação será registrada no sistema.');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium transition-colors bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg border border-red-100">
+                                            Excluir
+                                        </button>
+                                    </form>
+                                    {% endif %}
+
+                                </div>
+                            {% else %}
+                                <span class="text-gray-300 text-sm italic">Sem permissão</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-gray-500">Nenhum usuário encontrado no sistema.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

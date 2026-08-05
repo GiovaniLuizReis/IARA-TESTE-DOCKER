@@ -83,11 +83,19 @@
             {% endif %}
 
             {% if user.tipo_usuario == 'ADM' %}
+            
             <a href="#" 
                class="menu-link {% if active_page == 'configuracoes' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4">
                 <span class="material-symbols-outlined mr-3 text-[22px]">settings</span>
                 Configurações
             </a>
+
+            <a href="{% url 'listar_usuarios' %}" 
+               class="menu-link {% if active_page == 'usuarios' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4">
+                <span class="material-symbols-outlined mr-3 text-[22px]">badge</span>
+                Usuários
+            </a>
+
             {% endif %}
         </nav>
 
