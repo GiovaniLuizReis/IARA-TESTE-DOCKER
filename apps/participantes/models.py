@@ -1,81 +1,55 @@
 from django.db import models
-
+from apps.usuarios.models import CentroInvestigacao 
 
 class Participante(models.Model):
 
-    SEXO = (
-        ('M', 'Masculino'),
-        ('F', 'Feminino'),
+    SITUACAO_CHOICES = (
+        ('ativo', 'Ativo'),
+        ('aposentado', 'Aposentado'),
     )
 
-    ESTADOS = (
-        ('AM', 'Amazonas'),
-        ('BA', 'Bahia'),
-        ('CE', 'Ceará'),
-        ('MG', 'Minas Gerais'),
-        ('PE', 'Pernambuco'),
-        ('PR', 'Paraná'),
-        ('RJ', 'Rio de Janeiro'),
-        ('RS', 'Rio Grande do Sul'),
-        ('SP', 'São Paulo'),
+    VINCULO_CHOICES = (
+        ('servidor', 'Servidor'),
+        ('terceirizado', 'Terceirizado'),
     )
 
-    estado = models.CharField(
-        max_length=2,
-        choices=ESTADOS
+    centro = models.ForeignKey(
+        CentroInvestigacao, 
+        on_delete=models.PROTECT, 
+        related_name='participantes'
     )
+    
+    identificacao = models.CharField(max_length=30, unique=True, blank=True)
 
-    centro = models.IntegerField()
-
-    identificacao = models.CharField(
-        max_length=30,
-        unique=True,
-        blank=True
-    )
-
-    nome = models.CharField(
-        max_length=200
-    )
-
-    sobrenome = models.CharField(
-        max_length=200
-    )
-
-    email = models.EmailField()
-
-    telefone = models.CharField(
-        max_length=20,
-        blank=True,
-        null=True
-    )
-
+    # NOME SEPARADO AQUI
+    nome = models.CharField(max_length=200)
+    sobrenome = models.CharField(max_length=200)
+    
+    cpf = models.CharField(max_length=14, unique=True)
     data_nascimento = models.DateField()
+    nome_mae = models.CharField(max_length=255)
+    email = models.EmailField()
+    situacao_trabalho = models.CharField(max_length=20, choices=SITUACAO_CHOICES)
+    tipo_vinculo = models.CharField(max_length=20, choices=VINCULO_CHOICES)
+    instituicao_vinculo = models.CharField(max_length=255)
 
-    sexo = models.CharField(
-        max_length=1,
-        choices=SEXO
-    )
-
-    criado_em = models.DateTimeField(
-        auto_now_add=True
-    )
+    telefone = models.CharField(max_length=20, blank=True, null=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-
-        if not self.identificacao:
-
+        if not self.identificacao and self.centro:
             ultimo = Participante.objects.filter(
-                estado=self.estado,
                 centro=self.centro
             ).count() + 1
 
             sequencial = str(ultimo).zfill(5)
-
-            centro = str(self.centro).zfill(2)
+            
+            estado_sigla = self.centro.estado
+            centro_num = str(self.centro.numero).zfill(2)
 
             self.identificacao = (
-                f'{self.estado}'
-                f'{centro}'
+                f'{estado_sigla}'
+                f'{centro_num}'
                 f'PAC'
                 f'{sequencial}'
             )
@@ -83,4 +57,4 @@ class Participante(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.nome
+        return f'{self.nome} {self.sobrenome}'

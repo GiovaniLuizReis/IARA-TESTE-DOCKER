@@ -19,6 +19,14 @@ class Atividade(models.Model):
     token_acesso = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='nao_iniciado')
     progresso_percentual = models.IntegerField(default=0)
+
+    ultima_pergunta_acessada = models.ForeignKey(
+        'formularios.Pergunta', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='+'
+    )
     
     data_inicio = models.DateTimeField(null=True, blank=True)
     data_fim = models.DateTimeField(null=True, blank=True)

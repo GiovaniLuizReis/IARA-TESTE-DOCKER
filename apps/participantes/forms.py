@@ -1,60 +1,64 @@
 from django import forms
 from .models import Participante
 
-
 class ParticipanteForm(forms.ModelForm):
 
     class Meta:
         model = Participante
-
         fields = [
             'nome',
             'sobrenome',
-            'email',
+            'cpf',
             'data_nascimento',
-            'sexo',
-            'estado',
+            'nome_mae',
+            'email',
+            'situacao_trabalho',
+            'tipo_vinculo',
+            'instituicao_vinculo',
             'centro',
             'telefone',
         ]
 
         widgets = {
             'nome': forms.TextInput(attrs={
-                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3',
-                'placeholder': 'Nome completo'
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',
+                'placeholder': 'Nome'
             }),
-
             'sobrenome': forms.TextInput(attrs={
-                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3',
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',
                 'placeholder': 'Sobrenome'
             }),
-
-
-            'email': forms.EmailInput(attrs={
-                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3',
-                'placeholder': 'E-mail do participante'
+            'cpf': forms.TextInput(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',
+                'placeholder': '000.000.000-00'
             }),
-
             'data_nascimento': forms.DateInput(attrs={
                 'type': 'date',
-                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3'
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500'
             }),
-
-            'sexo': forms.Select(attrs={
-                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3'
+            'nome_mae': forms.TextInput(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',
+                'placeholder': 'Nome completo da mãe'
             }),
-
-            'estado': forms.Select(attrs={
-                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3'
+            'email': forms.EmailInput(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',
+                'placeholder': 'E-mail do participante'
             }),
-
-            'centro': forms.NumberInput(attrs={
-                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3',
-                'placeholder': 'Ex: 01'
+            'situacao_trabalho': forms.Select(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500 bg-white'
             }),
-
+            'tipo_vinculo': forms.Select(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500 bg-white'
+            }),
+            'instituicao_vinculo': forms.TextInput(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',
+                'placeholder': 'Ex: Ministério da Saúde, Hospital X...'
+            }),
+            'centro': forms.Select(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500 bg-white'
+            }),
             'telefone': forms.TextInput(attrs={
-                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3',
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',
                 'placeholder': '(DD) 90000-0000'
             }),
         }

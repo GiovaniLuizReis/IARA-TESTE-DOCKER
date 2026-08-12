@@ -31,7 +31,7 @@
             <div class="p-8 flex-1">
                 {% for pergunta in perguntas %}
                 
-                <div class="pergunta-card {% if not forloop.first %}hidden{% endif %}" data-index="{{ forloop.counter0 }}" data-id="{{ pergunta.id }}">
+                <div class="pergunta-card hidden" data-index="{{ forloop.counter0 }}" data-id="{{ pergunta.id }}">
                     
                     <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2 block">
                         Pergunta {{ forloop.counter }} de {{ perguntas|length }}
@@ -55,6 +55,20 @@
                         {% elif pergunta.tipo == 'data' %}
                             <input type="date" id="input_{{ pergunta.id }}" class="w-full md:w-1/2 border rounded-xl p-4 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all shadow-sm text-lg">
                         
+                        <!-- ADICIONADO: BLOCO DE DURAÇÃO (HORÁRIO) -->
+                        {% elif pergunta.tipo == 'duracao' %}
+                            <div class="flex items-center gap-4 mt-3">
+                                <div class="flex flex-col">
+                                    <label class="text-xs font-semibold text-gray-500 mb-1">Horas</label>
+                                    <input type="number" id="input_horas_{{ pergunta.id }}" min="0" placeholder="00" class="w-24 rounded-xl border border-gray-300 shadow-sm focus:ring-2 focus:border-emerald-500 focus:ring-emerald-500 p-4 bg-white outline-none text-center text-lg">
+                                </div>
+                                <span class="text-3xl font-bold text-gray-400 mt-4">:</span>
+                                <div class="flex flex-col">
+                                    <label class="text-xs font-semibold text-gray-500 mb-1">Minutos</label>
+                                    <input type="number" id="input_minutos_{{ pergunta.id }}" min="0" max="59" placeholder="00" class="w-24 rounded-xl border border-gray-300 shadow-sm focus:ring-2 focus:border-emerald-500 focus:ring-emerald-500 p-4 bg-white outline-none text-center text-lg">
+                                </div>
+                            </div>
+
                         {% elif pergunta.tipo == 'radio' %}
                             <div class="space-y-3">
                             {% for opcao in pergunta.opcoes.all %}
@@ -108,9 +122,17 @@
             const btnVoltar = document.getElementById('btn-voltar');
             const loading = document.getElementById('loading-overlay');
             const atividadeId = "{{ atividade.id }}";
+            const ultimaPerguntaId = "{{ ultima_pergunta_id|default:'' }}";
             let currentIndex = 0;
 
-            // Função que atualiza a tela para mostrar apenas a pergunta atual
+            if (ultimaPerguntaId !== '') {
+                cards.forEach((card, index) => {
+                    if (card.getAttribute('data-id') === ultimaPerguntaId) {
+                        currentIndex = index; 
+                    }
+                });
+            }
+
             function atualizarVisor() {
                 cards.forEach((card, index) => {
                     if (index === currentIndex) {
@@ -120,14 +142,12 @@
                     }
                 });
 
-                // Controla o botão "Anterior"
                 if (currentIndex === 0) {
                     btnVoltar.classList.add('hidden');
                 } else {
                     btnVoltar.classList.remove('hidden');
                 }
 
-                // Controla se o botão principal é "Próxima" ou "Finalizar"
                 if (currentIndex === cards.length - 1) {
                     btnAvançar.innerHTML = 'Finalizar Formulário <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
                     btnAvançar.classList.replace('bg-emerald-600', 'bg-blue-600');
@@ -139,7 +159,7 @@
                 }
             }
 
-            // Função para pegar a resposta preenchida na tela
+            // AJUSTADO: Inteligência para ler o campo de Duração
             function obterValorResposta(perguntaId, tipo) {
                 if (tipo === 'radio') {
                     const selecionado = document.querySelector(`input[name="input_${perguntaId}"]:checked`);
@@ -147,35 +167,45 @@
                 } else if (tipo === 'checkbox') {
                     const selecionados = Array.from(document.querySelectorAll(`input[name="input_${perguntaId}"]:checked`));
                     return selecionados.map(cb => cb.value);
+                } else if (tipo === 'duracao') {
+                    const horas = document.getElementById(`input_horas_${perguntaId}`).value;
+                    const minutos = document.getElementById(`input_minutos_${perguntaId}`).value;
+                    
+                    // Se o paciente preencheu pelo menos um dos campos, junta os dois
+                    if (horas || minutos) {
+                        const h = horas ? horas.padStart(2, '0') : '00';
+                        const m = minutos ? minutos.padStart(2, '0') : '00';
+                        return `${h}:${m}`;
+                    }
+                    return null;
                 } else {
                     const input = document.getElementById(`input_${perguntaId}`);
                     return input ? input.value : null;
                 }
             }
 
-            // Função assíncrona que envia a resposta para o Django salvar no banco
             async function salvarRespostaAtual() {
                 const cardAtual = cards[currentIndex];
                 const perguntaId = cardAtual.getAttribute('data-id');
                 
-                // Tenta descobrir o tipo de input olhando pro HTML dele
+                // AJUSTADO: Descobre se o campo na tela é do tipo Duração
                 let tipo = 'texto';
                 if (cardAtual.querySelector('input[type="radio"]')) tipo = 'radio';
                 else if (cardAtual.querySelector('input[type="checkbox"]')) tipo = 'checkbox';
                 else if (cardAtual.querySelector('select')) tipo = 'select';
+                else if (cardAtual.querySelector(`input[id="input_horas_${perguntaId}"]`)) tipo = 'duracao';
                 
                 const valor = obterValorResposta(perguntaId, tipo);
 
-                // Se houver valor preenchido, envia para a API
                 if (valor && valor.length !== 0) {
-                    loading.classList.replace('hidden', 'flex'); // Mostra a tela de carregamento rápida
+                    loading.classList.replace('hidden', 'flex'); 
                     
                     try {
                         const response = await fetch(`{% url 'salvar_resposta_assincrona' atividade.id %}`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'X-CSRFToken': '{{ csrf_token }}' // Proteção de segurança do Django
+                                'X-CSRFToken': '{{ csrf_token }}' 
                             },
                             body: JSON.stringify({
                                 pergunta_id: perguntaId,
@@ -186,7 +216,6 @@
                         
                         const data = await response.json();
                         if (data.status === 'success') {
-                            // Atualiza a barra de progresso no topo da tela instantaneamente
                             document.getElementById('barra-progresso').style.width = `${data.progresso}%`;
                             document.getElementById('texto-progresso').innerText = data.progresso;
                         }
@@ -198,7 +227,6 @@
                 }
             }
 
-            // Ação do Botão Próxima
             btnAvançar.addEventListener('click', async function() {
                 await salvarRespostaAtual();
                 
@@ -206,12 +234,10 @@
                     currentIndex++;
                     atualizarVisor();
                 } else {
-                    // Chegou na última tela e clicou em finalizar
                     window.location.href = "{% url 'resposta_sucesso' %}";
                 }
             });
 
-            // Ação do Botão Anterior
             btnVoltar.addEventListener('click', function() {
                 if (currentIndex > 0) {
                     currentIndex--;
@@ -219,7 +245,6 @@
                 }
             });
 
-            // Inicializa a tela garantindo que só a primeira aparece
             atualizarVisor();
         });
     </script>

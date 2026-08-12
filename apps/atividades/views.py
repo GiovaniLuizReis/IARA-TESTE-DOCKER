@@ -129,7 +129,6 @@ def responder_atividade_token(request, token):
         
     return motor_resposta(request, atividade, use_token=True)
 
-
 def motor_resposta(request, atividade, use_token=False):
     """Mecanismo interno comum para renderização de formulários (Pesquisador ou Participante)."""
     formulario = atividade.formulario
@@ -153,14 +152,15 @@ def motor_resposta(request, atividade, use_token=False):
         'formulario': formulario, 
         'perguntas': perguntas, 
         'respostas_dadas': respostas_dadas,
-        'use_token': use_token
+        'use_token': use_token,
+        # NOVO: Envia o ID da última pergunta respondida para a tela!
+        'ultima_pergunta_id': atividade.ultima_pergunta_acessada.id if atividade.ultima_pergunta_acessada else None
     })
 
 
 def resposta_sucesso(request):
     """Página de conclusão de fluxos externos."""
     return render(request, 'resposta_sucesso.html')
-
 
 @csrf_exempt
 def salvar_resposta_assincrona(request, atividade_id):
@@ -189,6 +189,9 @@ def salvar_resposta_assincrona(request, atividade_id):
             
         resposta_obj.save()
 
+        # NOVO: Atualiza o checkpoint indicando onde o participante parou
+        atividade.ultima_pergunta_acessada = pergunta
+
         # Recalcular métricas de progresso do instrumento
         total_perguntas = atividade.formulario.perguntas.count()
         respostas_contadas = atividade.respostas.count()
@@ -198,7 +201,14 @@ def salvar_resposta_assincrona(request, atividade_id):
             if progresso >= 100:
                 atividade.status = 'concluido'
                 atividade.data_fim = timezone.now()
-            atividade.save()
+                
+                # Se desejar salvar o tempo total em segundos:
+                if atividade.data_inicio:
+                    delta = atividade.data_fim - atividade.data_inicio
+                    atividade.tempo_gasto_segundos = int(delta.total_seconds())
+
+        # Salva o checkpoint, progresso e tempo de uma vez só
+        atividade.save()
 
         return JsonResponse({'status': 'success', 'progresso': atividade.progresso_percentual})
     
