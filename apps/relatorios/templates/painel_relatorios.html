@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatórios | IARA-SAÚDE{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto my-8 p-4">
+    
+    <!-- Cabeçalho -->
+    <div class="mb-8 border-b border-gray-200 pb-5">
+        <h1 class="text-3xl font-bold text-green-900 tracking-tight">Módulo de Relatórios</h1>
+        <p class="text-gray-500 mt-2 font-medium">Emita relatórios detalhados e exporte os dados da pesquisa. Acesso restrito à equipe técnica.</p>
+    </div>
+
+    <!-- Alertas do Django -->
+    {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for message in messages %}
+                <div class="p-4 rounded-xl text-sm font-medium shadow-sm {% if message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-green-50 text-green-800 border border-green-200{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Opções de Emissão -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
+
+        <!-- OPÇÃO 1: Exportação de Planilha (CSV) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 flex flex-col hover:shadow-md transition-all relative overflow-hidden">
+            <!-- Detalhe decorativo no topo -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
+            
+            <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 border border-emerald-100">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            </div>
+            
+            <h3 class="font-bold text-xl text-gray-800 mb-3">Dados Brutos (CSV)</h3>
+            <p class="text-sm text-gray-500 mb-8 flex-1 leading-relaxed">Gere uma planilha completa contendo todas as informações cadastrais e respostas estruturadas. Formato ideal para tabulação e análise estatística em Excel, SPSS ou Python.</p>
+            
+            <a href="{% url 'relatorios:exportar_csv' %}" class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 rounded-xl text-center transition-colors shadow-sm flex justify-center items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Baixar Planilha de Dados
+            </a>
+        </div>
+
+        <!-- OPÇÃO 2: Relatório Visual (PDF) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 flex flex-col hover:shadow-md transition-all relative overflow-hidden">
+            <!-- Detalhe decorativo no topo -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-blue-600"></div>
+            
+            <div class="w-14 h-14 bg-blue-50 text-blue-700 rounded-2xl flex items-center justify-center mb-6 border border-blue-100">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            </div>
+            
+            <h3 class="font-bold text-xl text-gray-800 mb-3">Relatório Consolidado (PDF)</h3>
+            <p class="text-sm text-gray-500 mb-8 flex-1 leading-relaxed">Gere um documento de leitura com métricas de pesquisa, taxa de resposta geral e o perfil demográfico da amostra consolidada até o momento. Otimizado para impressão.</p>
+            
+            <a href="{% url 'relatorios:exportar_pdf' %}" target="_blank" class="block w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3.5 rounded-xl text-center transition-colors shadow-sm flex justify-center items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                Visualizar e Imprimir Documento
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

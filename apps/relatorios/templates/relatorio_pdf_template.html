@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório IARA-SAÚDE - Demografia e Estatísticas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        @media print {
+            body { 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+                background-color: white !important;
+            }
+            .no-print { display: none !important; }
+            @page { margin: 1cm; size: A4 portrait; }
+            .page-break-inside-avoid { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 p-8 font-sans min-h-screen">
+
+    <div class="max-w-4xl mx-auto bg-white p-10 shadow-sm border border-gray-200">
+        
+        <div class="flex justify-between items-start border-b-2 border-green-900 pb-6 mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-green-900 tracking-tight">IARA-SAÚDE</h1>
+                <p class="text-sm text-gray-500 font-medium mt-1">Relatório Demográfico Consolidado (Dados Anonimizados)</p>
+            </div>
+            <div class="text-right text-sm text-gray-600">
+                <p>Data de Emissão: <span class="font-semibold">{{ data_emissao }}</span></p>
+                <p>Gerado por: <span class="font-semibold">{{ gerado_por }}</span></p>
+            </div>
+        </div>
+
+        <div class="mb-8 page-break-inside-avoid">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-200 pb-2">1. Progresso Geral da Pesquisa</h2>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <p class="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Total de Sujeitos</p>
+                    <p class="text-3xl font-bold text-green-700">{{ total_participantes }}</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <p class="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Taxa de Conclusão</p>
+                    <p class="text-3xl font-bold text-blue-600">{{ taxa_conclusao }}%</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <p class="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Em Andamento</p>
+                    <p class="text-3xl font-bold text-amber-500">{{ total_em_andamento }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-10 page-break-inside-avoid">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-200 pb-2">2. Estatísticas de Idade da Amostra</h2>
+            <table class="w-full text-left border-collapse border border-gray-200">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-700">
+                        <th class="p-3 border border-gray-200 text-sm font-bold w-1/3">Métrica</th>
+                        <th class="p-3 border border-gray-200 text-sm font-bold text-center">Valor Calculado</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <tr>
+                        <td class="p-3 font-medium text-sm text-gray-800 border border-gray-200 bg-gray-50">Média de Idade (Anos)</td>
+                        <td class="p-3 text-center text-gray-700 border border-gray-200">{{ media_idade_geral }}</td>
+                    </tr>
+                    <tr>
+                        <td class="p-3 font-medium text-sm text-gray-800 border border-gray-200 bg-gray-50">Mediana</td>
+                        <td class="p-3 text-center text-gray-700 border border-gray-200">{{ mediana_idade_geral }}</td>
+                    </tr>
+                    <tr>
+                        <td class="p-3 font-medium text-sm text-gray-800 border border-gray-200 bg-gray-50">Moda</td>
+                        <td class="p-3 text-center text-gray-700 border border-gray-200">{{ moda_idade_geral }}</td>
+                    </tr>
+                    <tr>
+                        <td class="p-3 font-medium text-sm text-gray-800 border border-gray-200 bg-gray-50">Idade Mínima / Máxima</td>
+                        <td class="p-3 text-center text-gray-700 border border-gray-200">{{ min_idade_geral }} a {{ max_idade_geral }} anos</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-200 pb-2">3. Amostra de Dados de Sujeitos (Recentes)</h2>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 border-b-2 border-gray-300">
+                        <th class="p-3 text-sm font-semibold text-gray-700">Código / ID</th>
+                        <th class="p-3 text-sm font-semibold text-gray-700">Idade Exata</th>
+                        <th class="p-3 text-sm font-semibold text-gray-700">Situação de Trabalho</th>
+                        <th class="p-3 text-sm font-semibold text-gray-700">Vínculo</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for p in participantes %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-3 text-sm text-gray-800 font-bold">
+                                #{{ p.id|stringformat:"04d" }} 
+                                {% if p.identificacao %}- {{ p.identificacao }}{% endif %}
+                            </td>
+                            <td class="p-3 text-sm text-gray-600">
+                                {{ p.idade_formatada }}
+                            </td>
+                            <td class="p-3 text-sm text-gray-600">
+                                {{ p.situacao_trabalho|default:"N/I" }}
+                            </td>
+                            <td class="p-3 text-sm text-gray-600">
+                                {{ p.tipo_vinculo|default:"N/I" }}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="p-6 text-center text-sm text-gray-500 italic">
+                                Nenhuma entrada registrada até o momento.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-12 text-center text-xs text-gray-400 pt-4 border-t border-gray-200">
+            Relatório desidentificado (anonimizado) gerado pelo sistema IARA-SAÚDE em conformidade com as diretrizes de proteção de dados.
+        </div>
+
+        <div class="no-print mt-12 flex justify-center gap-4 border-t border-gray-200 pt-8 bg-gray-50 -mx-10 px-10 pb-10">
+            <button onclick="window.close()" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition">
+                Fechar Aba
+            </button>
+            <button onclick="window.print()" class="px-6 py-2 bg-green-900 text-white rounded-lg font-medium hover:bg-green-800 transition shadow-md flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                Imprimir / Salvar PDF
+            </button>
+        </div>
+
+    </div>
+</body>
+</html>

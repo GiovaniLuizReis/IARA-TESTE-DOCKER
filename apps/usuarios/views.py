@@ -6,8 +6,12 @@ from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import PasswordResetConfirmView
 from django.core.mail import send_mail
+from django.urls import reverse_lazy
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
+from django.shortcuts import render
+from django.urls import reverse_lazy
+from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
 
 from .forms import UsuarioForm
 from .models import Usuario
@@ -196,7 +200,22 @@ def excluir_usuario(request, usuario_id):
 
     return redirect('listar_usuarios')
 
+class CustomPasswordResetView(PasswordResetView):
+    """
+    Exibe a tela para o usuário digitar o e-mail.
+    Após o envio, renderiza a mesma tela exibindo a mensagem de sucesso,
+    sem precisar redirecionar para uma URL diferente.
+    """
+    template_name = 'resetar_senha.html'
+    success_url = reverse_lazy('login') # Apenas para o Django não dar erro de rota ausente
 
+    def form_valid(self, form):
+        # 1. Faz o Django disparar o e-mail de reset padrão com o link
+        super().form_valid(form)
+        
+        # 2. Renderiza a mesma tela enviando a variável 'sucesso' como True
+        return render(self.request, self.template_name, {'sucesso': True})
+    
 class CriarSenhaView(PasswordResetConfirmView):
     "View para criação de senha após o primeiro acesso do usuário."
 

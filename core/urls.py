@@ -39,6 +39,7 @@ urlpatterns = [
     path('formularios/', include('apps.formularios.urls')),
     path('atividades/', include('apps.atividades.urls')),
     path('dashboard/', include('apps.dashboard.urls')),
+    path('relatorios/', include('apps.relatorios.urls')),
     # path('', include('pages.urls')),
 ]
 

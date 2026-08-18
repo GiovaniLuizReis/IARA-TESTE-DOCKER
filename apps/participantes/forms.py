@@ -12,11 +12,14 @@ class ParticipanteForm(forms.ModelForm):
             'data_nascimento',
             'nome_mae',
             'email',
+            'telefone',
+            'cep',
+            'endereco',
+            'complemento',
             'situacao_trabalho',
             'tipo_vinculo',
             'instituicao_vinculo',
             'centro',
-            'telefone',
         ]
 
         widgets = {
@@ -44,6 +47,23 @@ class ParticipanteForm(forms.ModelForm):
                 'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',
                 'placeholder': 'E-mail do participante'
             }),
+            'telefone': forms.TextInput(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',
+                'placeholder': '(DD) 90000-0000'
+            }),
+            # NOVOS WIDGETS DE ENDEREÇO
+            'cep': forms.TextInput(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',
+                'placeholder': '00000-000'
+            }),
+            'endereco': forms.TextInput(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',
+                'placeholder': 'Ex: Rua Principal, 123 - Bairro'
+            }),
+            'complemento': forms.TextInput(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',
+                'placeholder': 'Apto, Bloco, Casa (Opcional)'
+            }),
             'situacao_trabalho': forms.Select(attrs={
                 'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500 bg-white'
             }),
@@ -56,9 +76,5 @@ class ParticipanteForm(forms.ModelForm):
             }),
             'centro': forms.Select(attrs={
                 'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500 bg-white'
-            }),
-            'telefone': forms.TextInput(attrs={
-                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',
-                'placeholder': '(DD) 90000-0000'
             }),
         }

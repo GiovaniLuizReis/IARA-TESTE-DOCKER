@@ -34,6 +34,11 @@ class Participante(models.Model):
     instituicao_vinculo = models.CharField(max_length=255)
 
     telefone = models.CharField(max_length=20, blank=True, null=True)
+
+    cep = models.CharField(max_length=9, blank=True, null=True)
+    endereco = models.CharField(max_length=255, blank=True, null=True)
+    complemento = models.CharField(max_length=100, blank=True, null=True)
+    
     criado_em = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):

@@ -19,31 +19,101 @@ Editar Formulário
 
         <div class="space-y-6">
 
+            <!-- Nome -->
             <div>
                 <label class="block mb-2 font-medium">
                     Nome
                 </label>
 
                 {{ form.nome }}
+
+                {% if form.nome.errors %}
+                    <p class="text-red-500 text-xs mt-1">
+                        {{ form.nome.errors.0 }}
+                    </p>
+                {% endif %}
             </div>
 
+            <!-- Descrição -->
             <div>
                 <label class="block mb-2 font-medium">
                     Descrição
                 </label>
 
                 {{ form.descricao }}
+
+                {% if form.descricao.errors %}
+                    <p class="text-red-500 text-xs mt-1">
+                        {{ form.descricao.errors.0 }}
+                    </p>
+                {% endif %}
             </div>
 
+            <!-- Fase / Parte, Tempo e Ordem -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                <div>
+                    <label class="block mb-2 font-medium">
+                        Fase / Parte
+                    </label>
+
+                    {{ form.parte }}
+
+                    {% if form.parte.errors %}
+                        <p class="text-red-500 text-xs mt-1">
+                            {{ form.parte.errors.0 }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block mb-2 font-medium">
+                        Tempo Estimado (Minutos)
+                    </label>
+
+                    {{ form.tempo_estimado }}
+
+                    {% if form.tempo_estimado.errors %}
+                        <p class="text-red-500 text-xs mt-1">
+                            {{ form.tempo_estimado.errors.0 }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block mb-2 font-medium">
+                        Ordem de Exibição
+                    </label>
+
+                    {{ form.ordem }}
+
+                    {% if form.ordem.errors %}
+                        <p class="text-red-500 text-xs mt-1">
+                            {{ form.ordem.errors.0 }}
+                        </p>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- Formulário ativo -->
             <div>
                 <label class="flex items-center gap-3">
                     {{ form.ativo }}
+
                     Formulário ativo
                 </label>
+
+                {% if form.ativo.errors %}
+                    <p class="text-red-500 text-xs mt-1">
+                        {{ form.ativo.errors.0 }}
+                    </p>
+                {% endif %}
             </div>
 
         </div>
 
+        <!-- Botões -->
         <div class="mt-8 flex gap-3">
 
             <button type="submit"

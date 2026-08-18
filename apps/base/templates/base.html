@@ -74,8 +74,8 @@
             </a>
             {% endif %}
 
-            {% if user.tipo_usuario == 'ADM' or user.tipo_usuario == 'PES' %}
-            <a href="" 
+             {% if user.tipo_usuario == 'ADM' or user.tipo_usuario == 'PES' %}
+            <a href="{% url 'relatorios:painel' %}"
                class="menu-link {% if active_page == 'relatorios' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4">
                 <span class="material-symbols-outlined mr-3 text-[22px]">bar_chart</span>
                 Relatórios
