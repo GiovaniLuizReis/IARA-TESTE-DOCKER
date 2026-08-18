@@ -135,10 +135,10 @@ Pacientes | IARA-SAÚDE
 
                         <td class="px-6 py-4">
                             <div class="flex justify-center gap-2">
-                                <a href="#" class="bg-blue-50 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
+                                <a href="{% url 'detalhes_participante' participante.id %}" class="bg-blue-50 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
                                     Visualizar
                                 </a>
-                                <a href="#" class="bg-amber-50 text-amber-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-amber-100 transition-colors">
+                                <a href="{% url 'editar_participante' participante.id %}" class="bg-amber-50 text-amber-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-amber-100 transition-colors">
                                     Editar
                                 </a>
                                 <a href="{% url 'reenviar_link_participante' participante.id %}"
