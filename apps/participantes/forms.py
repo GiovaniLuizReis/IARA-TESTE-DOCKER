@@ -13,8 +13,10 @@ class ParticipanteForm(forms.ModelForm):
             'nome_mae',
             'email',
             'telefone',
+            'sexo',
             'cep',
             'endereco',
+            'numero_endereço',
             'complemento',
             'situacao_trabalho',
             'tipo_vinculo',
@@ -51,7 +53,11 @@ class ParticipanteForm(forms.ModelForm):
                 'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',
                 'placeholder': '(DD) 90000-0000'
             }),
-            # NOVOS WIDGETS DE ENDEREÇO
+            
+            'sexo': forms.Select(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500 bg-white'
+            }),
+           
             'cep': forms.TextInput(attrs={
                 'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',
                 'placeholder': '00000-000'
@@ -59,6 +65,10 @@ class ParticipanteForm(forms.ModelForm):
             'endereco': forms.TextInput(attrs={
                 'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',
                 'placeholder': 'Ex: Rua Principal, 123 - Bairro'
+            }),
+            'numero_endereço': forms.TextInput(attrs={
+                'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',
+                'placeholder': 'Número do endereço'
             }),
             'complemento': forms.TextInput(attrs={
                 'class': 'w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500',

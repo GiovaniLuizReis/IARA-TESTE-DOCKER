@@ -32,22 +32,23 @@ class UsuarioManager(BaseUserManager):
 
 
 class CentroInvestigacao(models.Model):
-    """Modelo para armazenar as unidades/centros de cada estado"""
+    """Modelo para armazenar as unidades/centros numéricos de cada estado conforme protocolo IARA"""
     
+    # Estados numerados de 1 a 9 conforme o PDF IARA-Saúde
     ESTADOS_PESQUISA = (
-        ('AC', 'Acre'),
-        ('AP', 'Amapá'),
-        ('AM', 'Amazonas'),
-        ('MA', 'Maranhão'),
-        ('MT', 'Mato Grosso'),
-        ('PA', 'Pará'),
-        ('RO', 'Rondônia'),
-        ('RR', 'Roraima'),
-        ('TO', 'Tocantins'),
+        ('1', 'Acre'),
+        ('2', 'Amapá'),
+        ('3', 'Amazonas'),
+        ('4', 'Maranhão'),
+        ('5', 'Mato Grosso'),
+        ('6', 'Pará'),
+        ('7', 'Rondônia'),
+        ('8', 'Roraima'),
+        ('9', 'Tocantins'),
     )
 
     nome = models.CharField(max_length=100)
-    estado = models.CharField(max_length=2, choices=ESTADOS_PESQUISA)
+    estado = models.CharField(max_length=1, choices=ESTADOS_PESQUISA)
     numero = models.IntegerField()
 
     class Meta:
@@ -56,7 +57,7 @@ class CentroInvestigacao(models.Model):
         unique_together = ['estado', 'numero']
 
     def __str__(self):
-        return f"{self.get_estado_display()} - {self.nome}" # pylint: disable=no-member
+        return f"{self.get_estado_display()} (CI: {self.numero}) - {self.nome}" # pylint: disable=no-member
 
 
 class Usuario(AbstractUser):
@@ -88,7 +89,6 @@ class Usuario(AbstractUser):
         null=True
     )
     
-    # Campo retornado para evitar o erro no makemigrations e admin
     identificacao = models.CharField(
         max_length=30,
         unique=True,
@@ -116,7 +116,6 @@ class Usuario(AbstractUser):
 
     USERNAME_FIELD = 'email'
 
-    # Ajustado para facilitar a criação de superusuário pelo terminal
     REQUIRED_FIELDS = [
         'first_name',
         'last_name',
@@ -124,19 +123,20 @@ class Usuario(AbstractUser):
     ]
 
     def save(self, *args, **kwargs):
-        # Gera a identificação automaticamente baseada no Centro vinculado
         if not self.identificacao and self.centro:
             ultimo = Usuario.objects.filter(
                 centro=self.centro,
                 tipo_usuario=self.tipo_usuario
             ).count() + 1
 
-            sequencial = str(ultimo).zfill(5)
-            estado_sigla = self.centro.estado # pylint: disable=no-member
-            centro_num = str(self.centro.numero).zfill(2) # pylint: disable=no-member
+            # Formato de 4 casas decimais para o sequencial
+            sequencial = str(ultimo).zfill(4)
+            estado_num = self.centro.estado # pylint: disable=no-member
+            centro_num = str(self.centro.numero) # pylint: disable=no-member
 
+            # ID do Usuário: Estado + CI + Tipo (ADM/PES) + Sequencial (Ex: 11ADM0001)
             self.identificacao = (
-                f'{estado_sigla}'
+                f'{estado_num}'
                 f'{centro_num}'
                 f'{self.tipo_usuario}'
                 f'{sequencial}'

@@ -57,6 +57,10 @@ Detalhes do Participante | IARA-SAÚDE
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Data de Nascimento</p>
                 <p class="text-gray-800 font-medium">{{ participante.data_nascimento|date:"d/m/Y" }}</p>
             </div>
+            <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Sexo</p>
+                <p class="text-gray-800 font-medium">{{ participante.get_sexo_display }}</p>
+            </div>
             <div class="md:col-span-2">
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Nome da Mãe</p>
                 <p class="text-gray-800 font-medium">{{ participante.nome_mae }}</p>

@@ -7,8 +7,34 @@
     <h1 class="text-3xl font-bold mb-2">Configurar Regra de Pulo</h1>
     <p class="text-gray-500 mb-8">Definição de lógica para a pergunta: <span class="font-semibold text-gray-700">{{ pergunta.titulo }}</span></p>
 
+    <!-- NOVA SEÇÃO: Lista de regras já cadastradas -->
+    {% if regras_existentes %}
+        <div class="bg-white rounded-2xl shadow-sm border p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4">Regras já configuradas:</h2>
+            <ul class="space-y-3">
+                {% for regra in regras_existentes %}
+                    <li class="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
+                        <span>
+                            Se responder <strong>"{{ regra.opcao_condicao.texto }}"</strong> &rarr; 
+                            {% if regra.acao == 'finalizar' %}
+                                <span class="text-red-600 font-semibold">Finalizar Questionário</span>
+                            {% else %}
+                                Pular para: <span class="text-blue-600 font-semibold">"{{ regra.pergunta_destino.titulo }}"</span>
+                            {% endif %}
+                        </span>
+                        <!-- Opcional: Você pode criar uma view/url para deletar a regra -->
+                        <a href="#" class="text-red-500 text-sm hover:underline">Remover</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <!-- O SEU FORMULÁRIO CONTINUA AQUI -->
     <form method="POST" action="{% url 'configurar_regra_pulo' pergunta.id %}" class="bg-white rounded-2xl shadow-sm border p-8 space-y-6">
         {% csrf_token %}
+        
+        <h2 class="text-xl font-bold mb-2">Adicionar Nova Regra</h2>
         
         {% if form.non_field_errors %}
             <div class="p-4 bg-red-50 text-red-600 rounded-xl mb-4 text-sm font-medium border border-red-100">
@@ -28,13 +54,11 @@
             {% endif %}
         </div>
         
-        <!-- NOVO CAMPO: Ação a ser executada -->
         <div>
             <label class="block mb-2 font-medium text-gray-700">Ação a ser executada:</label>
             {{ form.acao }}
         </div>
         
-        <!-- ENVOLVEMOS ESTE BLOCO COM UM ID PARA O JAVASCRIPT ESCONDER/MOSTRAR -->
         <div id="bloco_destino">
             <label class="block mb-2 font-medium text-gray-700">Pular diretamente para a pergunta:</label>
             {{ form.pergunta_destino }}
@@ -46,10 +70,10 @@
         
         <div class="mt-8 flex gap-3 pt-4 border-t">
             <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-medium shadow-sm transition-colors">
-                Salvar Regra de Pulo
+                Salvar Regra
             </button>
             <a href="{% url 'gerenciar_estrutura' pergunta.formulario.id %}" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-3 rounded-xl font-medium transition-colors">
-                Cancelar
+                Concluir e Voltar
             </a>
         </div>
     </form>
@@ -57,25 +81,22 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Estiliza os selects
         const selects = document.querySelectorAll('select');
         selects.forEach(select => {
             select.classList.add('w-full', 'rounded-xl', 'border-gray-300', 'shadow-sm', 'focus:border-purple-500', 'focus:ring-purple-500');
         });
 
-        // Lógica para esconder/mostrar o bloco destino
         const acaoSelect = document.getElementById('id_acao');
         const blocoDestino = document.getElementById('bloco_destino');
 
         function toggleDestino() {
             if (acaoSelect && acaoSelect.value === 'finalizar') {
-                blocoDestino.style.display = 'none'; // Esconde se for finalizar
+                blocoDestino.style.display = 'none'; 
             } else if (blocoDestino) {
-                blocoDestino.style.display = 'block'; // Mostra se for pular
+                blocoDestino.style.display = 'block'; 
             }
         }
 
-        // Executa ao carregar a página e toda vez que o select de ação mudar
         if (acaoSelect) {
             toggleDestino();
             acaoSelect.addEventListener('change', toggleDestino);

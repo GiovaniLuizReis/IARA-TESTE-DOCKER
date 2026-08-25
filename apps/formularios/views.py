@@ -136,28 +136,31 @@ def excluir_opcao(request, opcao_id):
 def configurar_regra_pulo(request, pergunta_id):
     pergunta = get_object_or_404(Pergunta, id=pergunta_id)
     
-    # BUSCA SE JÁ EXISTE UMA REGRA CONFIGURADA PARA ESTA PERGUNTA
-    regra_existente = RegraPulo.objects.filter(pergunta_origem=pergunta).first()
-    
+    # Busca todas as regras já cadastradas para esta pergunta
+    regras_existentes = RegraPulo.objects.filter(pergunta_origem=pergunta)
+
     if request.method == 'POST':
-        # SE JÁ EXISTIR, O DJANGO ATUALIZA A MESMA INSTÂNCIA EM VEZ DE CRIAR UMA DUPLICADA
-        form = RegraPuloForm(request.POST, instance=regra_existente, pergunta_origem=pergunta)
+        # Passa a pergunta_origem no kwargs como o seu form exige
+        form = RegraPuloForm(request.POST, pergunta_origem=pergunta)
         if form.is_valid():
-            regra = form.save(commit=False)
-            regra.pergunta_origem = pergunta
-            regra.save()
-            messages.success(request, 'Regra de pulo atualizada com sucesso.')
-            return redirect('gerenciar_estrutura', formulario_id=pergunta.formulario.id)
+            nova_regra = form.save(commit=False)
+            nova_regra.pergunta_origem = pergunta
+            nova_regra.save()
+            
+            # Redireciona para a mesma página para limpar o formulário e 
+            # permitir que o usuário adicione a próxima regra (Sim -> 4, Não -> 6, etc.)
+            return redirect('configurar_regra_pulo', pergunta_id=pergunta.id)
     else:
-        # SE JÁ EXISTIR, O INSTANCE FAZ OS SELECTS VINHAREM JÁ SELECIONADOS AUTOMATICAMENTE
-        form = RegraPuloForm(instance=regra_existente, pergunta_origem=pergunta)
-        
-    return render(request, 'configurar_regra_pulo.html', {
-        'form': form, 
-        'pergunta': pergunta, 
-        'regra_existente': regra_existente, # Passamos para o HTML saber se exibe o botão de apagar
-        'active_page': 'formularios'
-    })
+        # Formulário vazio para adicionar nova regra
+        form = RegraPuloForm(pergunta_origem=pergunta)
+
+    context = {
+        'pergunta': pergunta,
+        'form': form,
+        'regras_existentes': regras_existentes,
+    }
+    return render(request, 'configurar_regra_pulo.html', context)
+
 
 @login_required
 def excluir_regra_pulo(request, regra_id):
