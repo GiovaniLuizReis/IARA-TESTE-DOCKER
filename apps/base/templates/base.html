@@ -40,22 +40,23 @@
 
 <body class="bg-brand-bg text-gray-800 h-screen overflow-hidden flex">
 
-    <!-- SIDEBAR (agora em um arquivo único!) -->
-    <aside id="sidebar" class="w-64 bg-green-900 text-white flex flex-col flex-shrink-0">
+    <!-- SIDEBAR -->
+    <!-- ADICIONADO: transition-all duration-300 ease-in-out overflow-hidden para animação suave e evitar vazamento de texto -->
+    <aside id="sidebar" class="w-64 bg-green-900 text-white flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden">
         <div class="h-16 flex items-center px-6 border-b border-white/10">
-            <span class="font-bold text-lg tracking-wide">IARA-SAÚDE</span>
+            <span class="font-bold text-lg tracking-wide whitespace-nowrap">IARA-SAÚDE</span>
         </div>
 
         <nav class="flex-1 py-6 flex flex-col gap-1">
             <a href="{% url 'dashboard' %}" 
-               class="menu-link {% if active_page == 'dashboard' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4">
+               class="menu-link {% if active_page == 'dashboard' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4 whitespace-nowrap">
                 <span class="material-symbols-outlined mr-3 text-[22px]">dashboard</span>
                 Dashboard
             </a>
 
             {% if user.tipo_usuario == 'ADM' or user.tipo_usuario == 'PES' %}
             <a href="{% url 'listar_formularios' %}" 
-               class="menu-link {% if active_page == 'formularios' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4">
+               class="menu-link {% if active_page == 'formularios' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4 whitespace-nowrap">
                 <span class="material-symbols-outlined mr-3 text-[22px]">format_list_bulleted</span>
                 Formulários
             </a>
@@ -63,12 +64,12 @@
 
             {% if user.tipo_usuario == 'ADM' or user.tipo_usuario == 'PES' or user.tipo_usuario == 'ATE' %}
             <a href="{% url 'painel_atividades' %}" 
-               class="menu-link {% if active_page == 'atividades' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4">
+               class="menu-link {% if active_page == 'atividades' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4 whitespace-nowrap">
                 <span class="material-symbols-outlined mr-3 text-[22px]">assignment_add</span>
                 Atividades
             </a>
             <a href="{% url 'listar_participantes' %}" 
-               class="menu-link {% if active_page == 'participantes' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4">
+               class="menu-link {% if active_page == 'participantes' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4 whitespace-nowrap">
                 <span class="material-symbols-outlined mr-3 text-[22px]">group</span>
                 Participantes
             </a>
@@ -76,33 +77,31 @@
 
              {% if user.tipo_usuario == 'ADM' or user.tipo_usuario == 'PES' %}
             <a href="{% url 'relatorios:painel' %}"
-               class="menu-link {% if active_page == 'relatorios' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4">
+               class="menu-link {% if active_page == 'relatorios' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4 whitespace-nowrap">
                 <span class="material-symbols-outlined mr-3 text-[22px]">bar_chart</span>
                 Relatórios
             </a>
             {% endif %}
 
             {% if user.tipo_usuario == 'ADM' %}
-            
             <a href="#" 
-               class="menu-link {% if active_page == 'configuracoes' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4">
+               class="menu-link {% if active_page == 'configuracoes' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4 whitespace-nowrap">
                 <span class="material-symbols-outlined mr-3 text-[22px]">settings</span>
                 Configurações
             </a>
 
             <a href="{% url 'listar_usuarios' %}" 
-               class="menu-link {% if active_page == 'usuarios' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4">
+               class="menu-link {% if active_page == 'usuarios' %}menu-active text-white border-emerald-400{% else %}text-gray-300 border-transparent hover:text-white hover:bg-white/5{% endif %} flex items-center px-6 py-3 text-sm font-medium transition-colors border-l-4 whitespace-nowrap">
                 <span class="material-symbols-outlined mr-3 text-[22px]">badge</span>
                 Usuários
             </a>
-
             {% endif %}
         </nav>
 
         <div class="p-4 border-t border-white/10">
             <form method="POST" action="{% url 'logout' %}">
                 {% csrf_token %}
-                <button type="submit" class="w-full flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+                <button type="submit" class="w-full flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors whitespace-nowrap">
                     <span class="material-symbols-outlined mr-3 text-[20px]">logout</span>
                     Sair
                 </button>
@@ -115,10 +114,18 @@
         
         <!-- HEADER -->
         <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-10 flex-shrink-0">
-            <div class="relative w-full max-w-md">
-                <span class="material-symbols-outlined absolute left-3 top-2 text-gray-400 text-[20px]">search</span>
-                <input type="text" placeholder="Buscar pacientes, formulários..."
-                    class="w-full bg-gray-50 border border-gray-200 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/20">
+            <div class="flex items-center gap-3 flex-1">
+                
+                <!-- NOVO: Botão para recolher/expandir a sidebar -->
+                <button id="sidebarToggle" class="p-2 rounded-lg hover:bg-gray-100 text-gray-600 focus:outline-none transition-colors" title="Recolher/Expandir menu lateral">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+
+                <div class="relative w-full max-w-md">
+                    <span class="material-symbols-outlined absolute left-3 top-2 text-gray-400 text-[20px]">search</span>
+                    <input type="text" placeholder="Buscar pacientes, formulários..."
+                        class="w-full bg-gray-50 border border-gray-200 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/20">
+                </div>
             </div>
 
             <div class="flex items-center gap-3 ml-4 border-l border-gray-200 pl-5 flex-shrink-0">
@@ -142,6 +149,43 @@
         </div>
     </main>
 
-    {% block extra_js %}{% endblock %}
+    {% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.getElementById('sidebarToggle');
+            
+            // Verifica se o usuário já escolheu deixar o menu fechado anteriormente
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            
+            function applySidebarState(collapsed) {
+                if (collapsed) {
+                    sidebar.classList.remove('w-64');
+                    sidebar.classList.add('w-0');
+                } else {
+                    sidebar.classList.remove('w-0');
+                    sidebar.classList.add('w-64');
+                }
+            }
+
+            // Aplica o estado inicial SEM animação para evitar "piscada" no carregamento
+            sidebar.classList.remove('transition-all', 'duration-300', 'ease-in-out');
+            applySidebarState(isCollapsed);
+            
+            // Reabilita a transição após o carregamento inicial para animar os próximos cliques
+            setTimeout(() => {
+                sidebar.classList.add('transition-all', 'duration-300', 'ease-in-out');
+            }, 50);
+
+            // Evento de clique no botão
+            toggleBtn.addEventListener('click', function() {
+                const newState = sidebar.classList.contains('w-0') ? false : true;
+                applySidebarState(newState);
+                // Salva a preferência no navegador do usuário
+                localStorage.setItem('sidebarCollapsed', newState);
+            });
+        });
+    </script>
+    {% endblock %}
 </body>
 </html>

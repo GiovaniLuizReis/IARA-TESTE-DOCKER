@@ -161,15 +161,18 @@ def configurar_regra_pulo(request, pergunta_id):
     }
     return render(request, 'configurar_regra_pulo.html', context)
 
-
 @login_required
 def excluir_regra_pulo(request, regra_id):
     regra = get_object_or_404(RegraPulo, id=regra_id)
-    formulario_id = regra.pergunta_origem.formulario.id
+    # Guarda o ID da pergunta antes de apagar a regra da memória
+    pergunta_id = regra.pergunta_origem.id 
+    
     if request.method == 'POST':
         regra.delete()
-        messages.success(request, 'Regra de pulo removida.')
-    return redirect('gerenciar_estrutura', formulario_id=formulario_id)
+        messages.success(request, 'Regra de pulo removida com sucesso.')
+        
+    # Retorna para a tela de edição de regras daquela mesma pergunta
+    return redirect('configurar_regra_pulo', pergunta_id=pergunta_id)
 
 @login_required
 @xframe_options_sameorigin
