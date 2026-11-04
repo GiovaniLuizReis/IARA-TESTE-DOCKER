@@ -200,6 +200,50 @@ def excluir_usuario(request, usuario_id):
 
     return redirect('listar_usuarios')
 
+@login_required
+def reenviar_link_acesso(request, usuario_id):
+    """
+    Gera um novo token de reset de senha e reenvia 
+    o e-mail de primeiro acesso para um usuário existente.
+    """
+    # Proteção: Apenas ADM Central ou TI podem reenviar o link
+    if not (request.user.is_superuser or request.user.tipo_usuario == 'ADM'):
+        messages.error(request, 'Você não possui permissão para reenviar links de acesso.')
+        return redirect('listar_usuarios')
+
+    usuario = get_object_or_404(Usuario, id=usuario_id)
+
+    if request.method == 'POST':
+        # Geração da nova chave e do link
+        uid = urlsafe_base64_encode(force_bytes(usuario.pk))
+        token = default_token_generator.make_token(usuario)
+        link_painel = request.build_absolute_uri(f'/contas/reset/{uid}/{token}/')
+
+        assunto = 'IARA-Saúde: Novo Link de Acesso'
+        mensagem = f"""Olá, {usuario.first_name}.
+
+        Você ou seu coordenador solicitou um novo link de acesso para o sistema IARA-SAÚDE.
+        Para criar a sua senha e entrar no sistema, clique no link abaixo:
+        {link_painel}
+
+        Este link é seguro e de uso único.
+        """
+        # Disparo de e-mail
+        try:
+            send_mail(
+                subject=assunto,
+                message=mensagem,
+                from_email='sistema@iarasaude.com.br', 
+                recipient_list=[usuario.email],
+                fail_silently=False,
+            )
+            messages.success(request, f'Novo link enviado com sucesso para o e-mail de {usuario.first_name}!')
+        except Exception as e:
+            messages.warning(request, f'Ocorreu um erro na rede ao tentar reenviar o e-mail: {e}')
+
+    return redirect('listar_usuarios')
+
+
 class CustomPasswordResetView(PasswordResetView):
     """
     Exibe a tela para o usuário digitar o e-mail.

@@ -10,6 +10,9 @@ urlpatterns = [
     # Recurperar e criar senha
     path('resetar-senha/', views.CustomPasswordResetView.as_view(), name='password_reset'),
     path('contas/reset/<uidb64>/<token>/', views.CriarSenhaView.as_view(), name='password_reset_confirm'),
+
+    #Reenviar link de acesso
+    path('usuarios/<int:usuario_id>/reenviar-link/', views.reenviar_link_acesso, name='reenviar_link_acesso'),
     
     # Login e Logout
     path('', login_view, name='home'),
