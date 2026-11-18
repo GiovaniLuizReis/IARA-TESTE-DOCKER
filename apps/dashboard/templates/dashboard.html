@@ -6,10 +6,11 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <div class="max-w-7xl mx-auto">
+    <!-- CABEÇALHO E FILTROS -->
     <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-            <h2 class="text-3xl font-bold text-gray-800">Visão Geral</h2>
-            <p class="text-gray-500 mt-1">Acompanhamento de participantes e formulários da pesquisa.</p>
+            <h2 class="text-3xl font-bold text-gray-800">Visão Geral do Projeto</h2>
+            <p class="text-gray-500 mt-1">Acompanhamento demográfico e de progresso dos participantes.</p>
         </div>
         
         <form method="GET" class="flex gap-2 w-full md:w-auto">
@@ -19,11 +20,15 @@
                 <option value="em_andamento" {% if request.GET.status == 'em_andamento' %}selected{% endif %}>Em Andamento</option>
                 <option value="nao_iniciado" {% if request.GET.status == 'nao_iniciado' %}selected{% endif %}>Não Iniciados</option>
             </select>
+            
+            <!-- SELECT DE SEXO AJUSTADO COM OS VALORES DO MODEL -->
             <select name="sexo" class="border-gray-300 rounded-xl shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-sm">
-                <option value="">Gênero (Todos)</option>
-                <option value="M" {% if request.GET.sexo == 'M' %}selected{% endif %}>Masculino</option>
-                <option value="F" {% if request.GET.sexo == 'F' %}selected{% endif %}>Feminino</option>
+                <option value="">Sexo (Todos)</option>
+                <option value="masculino" {% if request.GET.sexo == 'masculino' %}selected{% endif %}>Masculino</option>
+                <option value="feminino" {% if request.GET.sexo == 'feminino' %}selected{% endif %}>Feminino</option>
+                <option value="intersexo" {% if request.GET.sexo == 'intersexo' %}selected{% endif %}>Intersexo</option>
             </select>
+            
             <button type="submit" class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
                 Filtrar
             </button>
@@ -33,42 +38,73 @@
         </form>
     </div>
 
+    <!-- CARDS SUPERIORES DE MÉTRICAS -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             <p class="text-sm text-gray-500 font-medium uppercase tracking-wider">Total Participantes</p>
             <h3 class="text-4xl font-bold text-gray-800 mt-2">{{ total_participantes|default:"0" }}</h3>
         </div>
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <p class="text-sm text-gray-500 font-medium uppercase tracking-wider">Taxa de Conclusão Global</p>
+            <h3 class="text-4xl font-bold text-emerald-600 mt-2">{{ taxa_conclusao }}%</h3>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             <p class="text-sm text-gray-500 font-medium uppercase tracking-wider">Formulários Ativos</p>
             <h3 class="text-4xl font-bold text-gray-800 mt-2">{{ total_formularios|default:"0" }}</h3>
         </div>
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <p class="text-sm text-gray-500 font-medium uppercase tracking-wider">Pesquisadores</p>
-            <h3 class="text-4xl font-bold text-gray-800 mt-2">{{ total_pesquisadores|default:"0" }}</h3>
-        </div>
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             <p class="text-sm text-gray-500 font-medium uppercase tracking-wider">Ativ. Concluídas</p>
-            <h3 class="text-4xl font-bold text-emerald-600 mt-2">{{ atividades_concluidas|default:"0" }}</h3>
+            <h3 class="text-4xl font-bold text-blue-600 mt-2">{{ atividades_concluidas|default:"0" }}</h3>
         </div>
     </div>
 
+    <!-- PAINEL DE GRÁFICOS: LINHA 1 -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <h3 class="font-bold text-gray-700 mb-4">Fluxo de Fases (Acompanhamento)</h3>
+            <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-emerald-600 text-[20px]">equalizer</span>
+                Fluxo de Fases do Estudo
+            </h3>
             <div class="relative h-64 w-full flex items-center justify-center">
                 <canvas id="graficoFases"></canvas>
             </div>
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <h3 class="font-bold text-gray-700 mb-4">Progresso Geral (Atividades)</h3>
+            <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-blue-600 text-[20px]">pie_chart</span>
+                Progresso Geral (Atividades)
+            </h3>
             <div class="relative h-64 w-full flex items-center justify-center">
                 <canvas id="graficoStatus"></canvas>
             </div>
         </div>
     </div>
 
+    <!-- PAINEL DE GRÁFICOS: LINHA 2 (DEMOGRAFIA) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-purple-600 text-[20px]">bar_chart</span>
+                Distribuição por Faixa Etária
+            </h3>
+            <div class="relative h-64 w-full flex items-center justify-center">
+                <canvas id="graficoIdade"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-pink-600 text-[20px]">wc</span>
+                Distribuição por Sexo
+            </h3>
+            <div class="relative h-64 w-full flex items-center justify-center">
+                <canvas id="graficoSexo"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABELA DE ÚLTIMAS INTERAÇÕES -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
         <div class="p-6 border-b border-gray-100 flex justify-between items-center">
             <h3 class="font-bold text-gray-700 text-lg">Últimas Interações</h3>
@@ -87,7 +123,7 @@
                     {% for atividade in atividades_recentes %}
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4">
-                            <div class="font-medium text-gray-900">{{ atividade.participante.nome }}</div>
+                            <div class="font-medium text-gray-900">{{ atividade.participante.nome }} {{ atividade.participante.sobrenome }}</div>
                             <div class="text-xs text-gray-500">{{ atividade.participante.email }}</div>
                         </td>
                         <td class="px-6 py-4 text-gray-700">{{ atividade.formulario.nome }}</td>
@@ -122,72 +158,95 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     
-    // Gráfico de Progressão de Fases (Barras Horizontais)
-    const ctxFases = document.getElementById('graficoFases').getContext('2d');
-    new Chart(ctxFases, {
+    // 1. Gráfico de Fases (Horizontal)
+    new Chart(document.getElementById('graficoFases').getContext('2d'), {
         type: 'bar',
         data: {
             labels: ['Parte 1 (Online)', 'Parte 2 (Lab)', 'Concluído'],
             datasets: [{
-                label: 'Participantes na Fase',
+                label: 'Participantes',
                 data: [{{ fase_parte1|default:"0" }}, {{ fase_parte2|default:"0" }}, {{ fase_concluido|default:"0" }}],
-                backgroundColor: [
-                    'rgba(59, 130, 246, 0.85)',  // Azul para P1
-                    'rgba(245, 158, 11, 0.85)',  // Amarelo para P2
-                    'rgba(16, 185, 129, 0.85)'   // Verde para Concluído
-                ],
+                backgroundColor: ['rgba(59, 130, 246, 0.85)', 'rgba(245, 158, 11, 0.85)', 'rgba(16, 185, 129, 0.85)'],
                 borderRadius: 6,
-                borderWidth: 0,
                 barThickness: 24
             }]
         },
         options: {
-            indexAxis: 'y', // Força o gráfico a ficar na horizontal
+            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false } // Oculta a legenda superior
-            },
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1,
-                        precision: 0
-                    },
-                    grid: { display: false }
-                },
-                y: {
-                    grid: { display: false }
-                }
-            }
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true, grid: { display: false } }, y: { grid: { display: false } } }
         }
     });
 
-    // Gráfico de Status das Atividades (Doughnut)
-    const ctxStatus = document.getElementById('graficoStatus').getContext('2d');
-    new Chart(ctxStatus, {
+    // 2. Gráfico de Status das Atividades (Doughnut)
+    new Chart(document.getElementById('graficoStatus').getContext('2d'), {
         type: 'doughnut',
         data: {
             labels: ['Concluído', 'Em Andamento', 'Não Iniciado'],
             datasets: [{
-                data: [
-                    {{ atividades_concluidas|default:"0" }}, 
-                    {{ atividades_em_andamento|default:"0" }}, 
-                    {{ atividades_nao_iniciadas|default:"0" }}
-                ],
-                backgroundColor: ['#10b981', '#f59e0b', '#9ca3af'], // Verde, Amarelo, Cinza
-                borderWidth: 0,
-                hoverOffset: 4
+                data: [{{ atividades_concluidas|default:"0" }}, {{ atividades_em_andamento|default:"0" }}, {{ atividades_nao_iniciadas|default:"0" }}],
+                backgroundColor: ['#10b981', '#f59e0b', '#9ca3af'],
+                borderWidth: 0
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom' }
-            },
-            cutout: '70%' // Espessura da rosca
+            plugins: { legend: { position: 'bottom' } },
+            cutout: '70%'
+        }
+    });
+
+    // 3. Gráfico de Faixa Etária (Barras Verticais)
+    new Chart(document.getElementById('graficoIdade').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['18-29 anos', '30-44 anos', '45-59 anos', '60+ anos', 'N/I'],
+            datasets: [{
+                label: 'Participantes',
+                data: [
+                    {{ faixas_etarias.18_29|default:"0" }},
+                    {{ faixas_etarias.30_44|default:"0" }},
+                    {{ faixas_etarias.45_59|default:"0" }},
+                    {{ faixas_etarias.60_plus|default:"0" }},
+                    {{ faixas_etarias.nao_informado|default:"0" }}
+                ],
+                backgroundColor: 'rgba(139, 92, 246, 0.85)',
+                borderRadius: 6,
+                barThickness: 28
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+        }
+    });
+
+    // 4. Gráfico de Distribuição por Sexo (Donut) - Atualizado
+    new Chart(document.getElementById('graficoSexo').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Masculino', 'Feminino', 'Intersexo', 'Não Informado'],
+            datasets: [{
+                data: [
+                    {{ distribuicao_sexo.masculino|default:"0" }},
+                    {{ distribuicao_sexo.feminino|default:"0" }},
+                    {{ distribuicao_sexo.intersexo|default:"0" }},
+                    {{ distribuicao_sexo.nao_informado|default:"0" }}
+                ],
+                backgroundColor: ['#3b82f6', '#ec4899', '#8b5cf6', '#6b7280'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' } },
+            cutout: '65%'
         }
     });
 });

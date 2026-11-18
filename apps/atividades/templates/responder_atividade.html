@@ -117,7 +117,6 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // 1. CARREGAR AS REGRAS DE PULO DO BANCO DE DADOS
             const regrasPulo = {
                 {% for pergunta in perguntas %}
                     {% for regra in pergunta.regras_origem.all %}
@@ -137,7 +136,7 @@
             const ultimaPerguntaId = "{{ ultima_pergunta_id|default:'' }}";
             
             let currentIndex = 0;
-            let historyStack = []; // 2. NOVO: Histórico para o botão "Voltar" funcionar perfeitamente com os pulos
+            let historyStack = [];
 
             if (ultimaPerguntaId !== '') {
                 cards.forEach((card, index) => {
@@ -224,7 +223,6 @@
                 }
             }
 
-            // 3. NOVO: LÓGICA DE AVANÇAR COM VERIFICAÇÃO DAS REGRAS
             btnAvançar.addEventListener('click', async function() {
                 const cardAtual = cards[currentIndex];
                 const perguntaId = cardAtual.getAttribute('data-id');
@@ -237,20 +235,17 @@
                 
                 const valor = obterValorResposta(perguntaId, tipo);
 
-                // Salva no banco de dados primeiro
                 await salvarRespostaAtual(perguntaId, tipo, valor);
 
-                let proximoIndex = currentIndex + 1; // Comportamento padrão
+                let proximoIndex = currentIndex + 1;
                 let acaoFinalizar = false;
 
-                // Lê se a resposta selecionada engatilha alguma regra de pulo ou finalização
                 if (valor && (tipo === 'radio' || tipo === 'select')) {
                     const regra = regrasPulo[valor];
                     if (regra) {
                         if (regra.acao === 'finalizar') {
                             acaoFinalizar = true;
                         } else if (regra.acao === 'pular' && regra.destino_id) {
-                            // Varre os cards da tela e encontra qual é o número/index do destino
                             const indexDestino = Array.from(cards).findIndex(c => c.getAttribute('data-id') === regra.destino_id);
                             if (indexDestino !== -1) {
                                 proximoIndex = indexDestino;
@@ -259,22 +254,19 @@
                     }
                 }
 
-                // Executa o próximo passo
                 if (acaoFinalizar) {
                     window.location.href = "{% url 'resposta_sucesso' %}";
                 } else if (proximoIndex < cards.length) {
-                    historyStack.push(currentIndex); // Guarda a página atual no histórico
-                    currentIndex = proximoIndex;     // Pula direto para a próxima página ou destino
+                    historyStack.push(currentIndex);
+                    currentIndex = proximoIndex;
                     atualizarVisor();
                 } else {
                     window.location.href = "{% url 'resposta_sucesso' %}";
                 }
             });
 
-            // 4. NOVO: LÓGICA DO BOTÃO VOLTAR RESPEITANDO O HISTÓRICO DE PULOS
             btnVoltar.addEventListener('click', function() {
                 if (historyStack.length > 0) {
-                    // Pega a última tela acessada e volta para ela
                     currentIndex = historyStack.pop();
                     atualizarVisor();
                 } else if (currentIndex > 0) {
@@ -284,6 +276,20 @@
             });
 
             atualizarVisor();
+
+            // SCRIPT DE REGISTRO DE PAUSA / FECHAMENTO DA PÁGINA
+            window.addEventListener('beforeunload', function () {
+                if (currentIndex < cards.length - 1) {
+                    fetch(`{% url 'registrar_pausa_assincrona' atividade.id %}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        keepalive: true
+                    });
+                }
+            });
         });
     </script>
 </body>

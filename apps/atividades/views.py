@@ -38,9 +38,11 @@ def pesquisador_assumir_atividade(request, atividade_id):
     """Permite ao pesquisador assumir e preencher o formulário junto com o participante."""
     atividade = get_object_or_404(Atividade, id=atividade_id)
     
+    # Rastreio no Histórico
     HistoricoAtividade.objects.create(
         atividade=atividade,
-        acao="Pesquisador assumiu o preenchimento",
+        tipo_acao='assumir',
+        acao=f"Pesquisador {request.user.get_full_name() or request.user.username} assumiu o preenchimento.",
         usuario_responsavel=request.user
     )
     return motor_resposta(request, atividade, use_token=False)
@@ -69,6 +71,18 @@ def visualizar_respostas(request, atividade_id):
         'atividade': atividade,
         'formulario': formulario,
         'perguntas': perguntas
+    })
+
+
+@login_required
+def visualizar_historico_atividade(request, atividade_id):
+    """Exibe o histórico cronológico detalhado de uma atividade."""
+    atividade = get_object_or_404(Atividade, id=atividade_id)
+    historico = atividade.historico.all()
+    
+    return render(request, 'visualizar_historico.html', {
+        'atividade': atividade,
+        'historico': historico,
     })
 
 
@@ -107,7 +121,7 @@ def gerar_atividades_p2(request, participante_id):
 def painel_participante_token(request, token):
     """Hub central de cards de acesso seguro para o participante preencher online (Parte 1)."""
     atividade_ref = get_object_or_404(Atividade, token_acesso=token)
-    participante = activity_ref = atividade_ref.participante
+    participante = atividade_ref.participante
     
     atividades = Atividade.objects.filter(
         participante=participante,
@@ -129,6 +143,7 @@ def responder_atividade_token(request, token):
         
     return motor_resposta(request, atividade, use_token=True)
 
+
 def motor_resposta(request, atividade, use_token=False):
     """Mecanismo interno comum para renderização de formulários (Pesquisador ou Participante)."""
     formulario = atividade.formulario
@@ -139,9 +154,19 @@ def motor_resposta(request, atividade, use_token=False):
         atividade.data_inicio = timezone.now()
         atividade.save()
         
+        # Rastreio de Início no Histórico
         HistoricoAtividade.objects.create(
             atividade=atividade,
-            acao="Atividade Iniciada",
+            tipo_acao='inicio',
+            acao="Preenchimento Iniciado",
+            usuario_responsavel=request.user if not use_token else None
+        )
+    elif atividade.status == 'em_andamento':
+        # Rastreio de Retomada no Histórico
+        HistoricoAtividade.objects.create(
+            atividade=atividade,
+            tipo_acao='retomada',
+            acao="Preenchimento Retomado",
             usuario_responsavel=request.user if not use_token else None
         )
 
@@ -153,7 +178,6 @@ def motor_resposta(request, atividade, use_token=False):
         'perguntas': perguntas, 
         'respostas_dadas': respostas_dadas,
         'use_token': use_token,
-        # NOVO: Envia o ID da última pergunta respondida para a tela!
         'ultima_pergunta_id': atividade.ultima_pergunta_acessada.id if atividade.ultima_pergunta_acessada else None
     })
 
@@ -162,9 +186,10 @@ def resposta_sucesso(request):
     """Página de conclusão de fluxos externos."""
     return render(request, 'resposta_sucesso.html')
 
+
 @csrf_exempt
 def salvar_resposta_assincrona(request, atividade_id):
-    """Endpoint AJAX para gravação de respostas em tempo real pergunta por pergunta."""
+    """Endpoint AJAX para gravação de respostas em tempo real pergunta por pergunta, gerando histórico de alterações."""
     if request.method == 'POST':
         atividade = get_object_or_404(Atividade, id=atividade_id)
         dados = json.loads(request.body)
@@ -174,25 +199,61 @@ def salvar_resposta_assincrona(request, atividade_id):
         tipo = dados.get('tipo')
         
         pergunta = get_object_or_404(Pergunta, id=pergunta_id)
-        resposta_obj, _ = Resposta.objects.get_or_create(atividade=atividade, pergunta=pergunta)
+        
+        # Tenta buscar a resposta existente para auditar alterações
+        resposta_obj = Resposta.objects.filter(atividade=atividade, pergunta=pergunta).first()
+        valor_anterior = None
+        nova_criacao = False
 
+        if resposta_obj:
+            valor_anterior = resposta_obj.valor_texto
+        else:
+            resposta_obj = Resposta(atividade=atividade, pergunta=pergunta)
+            nova_criacao = True
+
+        # Processamento do tipo de dado
         if tipo == 'checkbox':
-            resposta_obj.opcoes_selecionadas.set(OpcaoPergunta.objects.filter(id__in=valor))
-            resposta_obj.valor_texto = ", ".join(map(str, valor))
+            if nova_criacao:
+                 resposta_obj.save()
+            opcoes = OpcaoPergunta.objects.filter(id__in=valor)
+            resposta_obj.opcoes_selecionadas.set(opcoes)
+            resposta_obj.valor_texto = ", ".join([op.texto for op in opcoes])
         elif tipo in ['radio', 'select']:
+            if nova_criacao:
+                 resposta_obj.save()
             op_sel = OpcaoPergunta.objects.filter(id=valor).first()
             if op_sel:
                 resposta_obj.opcoes_selecionadas.set([op_sel])
-                resposta_obj.valor_texto = str(valor)
+                resposta_obj.valor_texto = op_sel.texto
         else:
             resposta_obj.valor_texto = str(valor)
+            if nova_criacao:
+                resposta_obj.save()
             
         resposta_obj.save()
 
-        # NOVO: Atualiza o checkpoint indicando onde o participante parou
+        # Determina o usuário responsável (se logado ou via link do participante)
+        usuario = request.user if request.user.is_authenticated else None
+
+        # Registra a alteração no Histórico se a resposta já existia e o valor mudou
+        if not nova_criacao and valor_anterior != resposta_obj.valor_texto:
+            detalhes = {
+                'pergunta': pergunta.titulo,
+                'valor_anterior': valor_anterior,
+                'valor_novo': resposta_obj.valor_texto
+            }
+            HistoricoAtividade.objects.create(
+                atividade=atividade,
+                tipo_acao='alteracao',
+                acao=f"Resposta alterada: {pergunta.titulo}",
+                usuario_responsavel=usuario,
+                detalhes_json=detalhes
+            )
+
+        # Atualiza o checkpoint indicando onde o usuário parou
         atividade.ultima_pergunta_acessada = pergunta
 
-        # Recalcular métricas de progresso do instrumento
+        # Recalcular métricas de progresso
         total_perguntas = atividade.formulario.perguntas.count()
         respostas_contadas = atividade.respostas.count()
         if total_perguntas > 0:
@@ -202,14 +263,39 @@ def salvar_resposta_assincrona(request, atividade_id):
                 atividade.status = 'concluido'
                 atividade.data_fim = timezone.now()
                 
-                # Se desejar salvar o tempo total em segundos:
                 if atividade.data_inicio:
                     delta = atividade.data_fim - atividade.data_inicio
                     atividade.tempo_gasto_segundos = int(delta.total_seconds())
+                
+                # Rastreio de Conclusão no Histórico
+                HistoricoAtividade.objects.create(
+                    atividade=atividade,
+                    tipo_acao='conclusao',
+                    acao="Formulário Concluído",
+                    usuario_responsavel=usuario
+                )
 
-        # Salva o checkpoint, progresso e tempo de uma vez só
         atividade.save()
-
         return JsonResponse({'status': 'success', 'progresso': atividade.progresso_percentual})
     
+    return JsonResponse({'status': 'error'}, status=400)
+
+
+@csrf_exempt
+def registrar_pausa_assincrona(request, atividade_id):
+    """Endpoint AJAX para registrar quando o formulário é pausado (fechamento de janela ou saída)."""
+    if request.method == 'POST':
+        atividade = get_object_or_404(Atividade, id=atividade_id)
+        usuario = request.user if request.user.is_authenticated else None
+        
+        # Evita registrar múltiplas pausas consecutivas (spam no histórico)
+        ultimo_registro = atividade.historico.last()
+        if ultimo_registro and ultimo_registro.tipo_acao != 'pausa':
+            HistoricoAtividade.objects.create(
+                atividade=atividade,
+                tipo_acao='pausa',
+                acao="Preenchimento Pausado/Interrompido",
+                usuario_responsavel=usuario
+            )
+        return JsonResponse({'status': 'success'})
     return JsonResponse({'status': 'error'}, status=400)

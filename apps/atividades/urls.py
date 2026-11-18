@@ -20,6 +20,9 @@ urlpatterns = [
     # Histórico de leitura para visualizar as respostas de um formulário já concluído
     path('atividade/<int:atividade_id>/respostas/', views.visualizar_respostas, name='visualizar_respostas'),
 
+    # NOVO: Histórico de auditoria e linha do tempo da atividade
+    path('atividade/<int:atividade_id>/historico/', views.visualizar_historico_atividade, name='visualizar_historico_atividade'),
+
 
     # =========================================================================
     # FLUXO DO PARTICIPANTE (Acesso via Token Seguro por E-mail)
@@ -39,4 +42,7 @@ urlpatterns = [
     
     # API assíncrona utilizada pelo mecanismo de Auto-save das perguntas
     path('api/salvar-resposta/<int:atividade_id>/', views.salvar_resposta_assincrona, name='salvar_resposta_assincrona'),
+
+    # NOVO: API assíncrona para registrar pausa/interrupção do formulário
+    path('api/salvar-pausa/<int:atividade_id>/', views.registrar_pausa_assincrona, name='registrar_pausa_assincrona'),
 ]

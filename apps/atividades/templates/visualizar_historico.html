@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Histórico — {{ atividade.formulario.nome }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- CABEÇALHO DA PÁGINA -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <a href="{% url 'detalhe_participante_atividades' atividade.participante.id %}" class="text-sm text-emerald-600 hover:underline flex items-center gap-1 mb-2">
+                <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                Voltar às atividades de {{ atividade.participante.nome }}
+            </a>
+            <h1 class="text-3xl font-bold text-gray-800">Histórico de Auditoria</h1>
+            <p class="text-gray-500 mt-1">
+                Formulário: <strong class="text-gray-700">{{ atividade.formulario.nome }}</strong>
+            </p>
+        </div>
+
+        <div class="bg-white px-4 py-3 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-3">
+            <div class="text-right">
+                <p class="text-xs text-gray-400 font-bold uppercase">Status Atual</p>
+                <p class="text-sm font-bold {% if atividade.status == 'concluido' %}text-green-600{% else %}text-emerald-600{% endif %}">
+                    {{ atividade.get_status_display }}
+                </p>
+            </div>
+            <div class="h-8 w-px bg-gray-200"></div>
+            <div class="text-right">
+                <p class="text-xs text-gray-400 font-bold uppercase">Progresso</p>
+                <p class="text-sm font-bold text-gray-800">{{ atividade.progresso_percentual }}%</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- LINHA DO TEMPO (TIMELINE) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
+        <ol class="relative border-l-2 border-gray-200 ml-4 space-y-8">
+            {% for evento in historico %}
+            <li class="ml-6">
+                <!-- ÍCONE CONDICIONAL POR TIPO DE AÇÃO -->
+                <span class="absolute flex items-center justify-center w-8 h-8 rounded-full -left-4 ring-4 ring-white shadow-sm
+                    {% if evento.tipo_acao == 'inicio' %}bg-blue-100 text-blue-600
+                    {% elif evento.tipo_acao == 'conclusao' %}bg-green-100 text-green-600
+                    {% elif evento.tipo_acao == 'alteracao' %}bg-amber-100 text-amber-600
+                    {% elif evento.tipo_acao == 'assumir' %}bg-purple-100 text-purple-600
+                    {% elif evento.tipo_acao == 'pausa' %}bg-gray-100 text-gray-600
+                    {% elif evento.tipo_acao == 'retomada' %}bg-emerald-100 text-emerald-600
+                    {% else %}bg-gray-100 text-gray-600{% endif %}">
+                    
+                    <span class="material-symbols-outlined text-[18px]">
+                        {% if evento.tipo_acao == 'inicio' %}play_arrow
+                        {% elif evento.tipo_acao == 'conclusao' %}check
+                        {% elif evento.tipo_acao == 'alteracao' %}edit
+                        {% elif evento.tipo_acao == 'assumir' %}person_raised_hand
+                        {% elif evento.tipo_acao == 'pausa' %}pause
+                        {% elif evento.tipo_acao == 'retomada' %}resume
+                        {% else %}info{% endif %}
+                    </span>
+                </span>
+
+                <!-- CABEÇALHO DO EVENTO -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
+                    <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                        {{ evento.acao }}
+                    </h3>
+                    <time class="text-xs font-mono text-gray-400 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
+                        {{ evento.data_hora|date:"d/m/Y H:i:s" }}
+                    </time>
+                </div>
+                
+                <!-- RESPONSÁVEL PELA AÇÃO -->
+                <p class="text-xs text-gray-500 mb-3">
+                    Responsável: 
+                    {% if evento.usuario_responsavel %}
+                        <span class="font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-100">
+                            {{ evento.usuario_responsavel.get_full_name|default:evento.usuario_responsavel.username }} (Pesquisador)
+                        </span>
+                    {% else %}
+                        <span class="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                            Participante (via Link Seguro)
+                        </span>
+                    {% endif %}
+                </p>
+
+                <!-- DETALHES DAS ALTERAÇÕES (VALOR ANTERIOR VS NOVO VALOR) -->
+                {% if evento.tipo_acao == 'alteracao' and evento.detalhes_json %}
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 text-sm mt-2">
+                        <p class="font-medium text-gray-800 mb-3">
+                            <strong>Pergunta:</strong> {{ evento.detalhes_json.pergunta }}
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="bg-red-50/70 p-3 rounded-lg border border-red-100">
+                                <span class="text-xs font-bold text-red-500 uppercase tracking-wider block mb-1">Valor Anterior:</span>
+                                <span class="text-red-700 line-through font-medium">{{ evento.detalhes_json.valor_anterior|default:"(Vazio)" }}</span>
+                            </div>
+                            <div class="bg-green-50/70 p-3 rounded-lg border border-green-100">
+                                <span class="text-xs font-bold text-green-600 uppercase tracking-wider block mb-1">Novo Valor:</span>
+                                <span class="text-green-800 font-bold">{{ evento.detalhes_json.valor_novo }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </li>
+            {% empty %}
+                <li class="text-center py-12 text-gray-400 italic">
+                    Nenhum evento registrado no histórico para esta atividade.
+                </li>
+            {% endfor %}
+        </ol>
+    </div>
+</div>
+{% endblock %}

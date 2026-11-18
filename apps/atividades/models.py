@@ -50,10 +50,26 @@ class Resposta(models.Model):
 
 class HistoricoAtividade(models.Model):
     ORIGEM_CHOICES = (('online', 'Online'), ('papel', 'Papel'))
+    TIPO_ACAO_CHOICES = (
+        ('inicio', 'Início de Preenchimento'),
+        ('pausa', 'Pausa/Interrupção'),
+        ('retomada', 'Retomada de Preenchimento'),
+        ('conclusao', 'Conclusão do Formulário'),
+        ('assumir', 'Pesquisador Assumiu'),
+        ('alteracao', 'Alteração de Resposta'),
+        ('outros', 'Outros Eventos')
+    )
     
     atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE, related_name='historico')
+    tipo_acao = models.CharField(max_length=20, choices=TIPO_ACAO_CHOICES, default='outros')
     acao = models.CharField(max_length=255)
     usuario_responsavel = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     origem = models.CharField(max_length=20, choices=ORIGEM_CHOICES, default='online')
     data_hora = models.DateTimeField(auto_now_add=True)
     detalhes_json = models.JSONField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['data_hora']
+
+    def __str__(self):
+        return f"{self.data_hora.strftime('%d/%m/%Y %H:%M')} - {self.get_tipo_acao_display()} - {self.atividade}"
